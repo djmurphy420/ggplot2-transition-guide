@@ -13,6 +13,13 @@ take up almost as much space as the text and the LaTeX floats get too far away f
 several places. The default behavior in knitr is much more pleasing and lets one get away
 with short comments between plot chunks.
 
+The structure of code chunks in knitr is similar to that of Sweave, but the arguments in
+the header are, in general, different. The basic structure is
+
+<<name,arg1=val1,arg2=val2,...,argk=valk>>=
+    your code here
+@
+
 
 Here's how the flow works, more or less:
 
@@ -24,13 +31,17 @@ knit('filename.Rnw')
 This will process the .Rnw file and output a filename.tex file that can be run with pdflatex.
 Very similar to Sweave().
 
+As shown in the existing code chunk headers, no spaces are allowed between arguments inside a 
+code chunk in knitr.
+
 
 The relevant arguments in a code chunk header are:
 
-fig.width:  actual width of the graphic produced in R
-fig.height: actual height -----------  "" ----------
+fig.width:  actual width of the graphic produced in R (in inches)
+fig.height: actual height -----------  "" ----------------------
 fig.align:  how the figure should be aligned (left,center,right)
-out.width:  width of the plot on the printed page
+out.width:  width of the plot on the printed page 
+                (usually a fraction of the \textwidth or \linewidth)
 fig.show:   how printed figures should be arranged on a page (asis [default], hold, animate)
                - asis: one plot for each code chunk that produces a plot
                - hold: collates plots until the end, where they are processed as a group
