@@ -1,0 +1,1244 @@
+\documentclass[11pt]{article}
+
+\setlength{\parskip}{0.5ex plus0.1ex minus0.1ex}
+%\setlength{\parindent}{0em}
+%
+%\usepackage[pdftex]{graphicx}
+\usepackage[reqno]{amsmath}
+\usepackage{amsopn,amsbsy,amstext,amsthm,lineno}
+\usepackage{enumerate,calc}
+%\usepackage[small]{caption2}
+%\usepackage[round,longnamesfirst]{natbib}
+\usepackage{url}
+\usepackage[authoryear]{natbib}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+\usepackage{geometry}
+\geometry{body={6in,8.5in},top=1in,left=1.25in}
+% Commands to control position of graphics output
+\doublehyphendemerits=100000
+\brokenpenalty=10000
+\widowpenalty=10000
+\clubpenalty=1000
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.8}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\floatpagefraction}{0.75}
+\newenvironment{Ventry}[1]
+   {\begin{list}{}{\renewcommand{\makelabel}[1]{\textsf{##1:}\hfil}
+      \settowidth{\labelwidth}{\textsf{#1:}}
+      \setlength{\leftmargin}{\labelwidth+\labelsep}}}
+   {\end{list}}
+%
+\newcommand{\strong}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+\newcommand{\class}[1]{\mbox{\textsf{#1}}}
+\newcommand{\func}[1]{\mbox{\texttt{#1()}}}
+\newcommand{\code}[1]{\mbox{\texttt{#1}}}
+\newcommand{\pkg}[1]{\strong{#1}}
+\newcommand{\txt}[1]{`\mbox{\texttt{#1}}'}
+\newcommand{\proglang}[1]{\textsf{#1}}
+\newcommand{\set}[1]{\mathcal{#1}}
+\newcommand{\R}{\mbox{\textsf{R}}}
+\newcommand{\ie}{\mbox{i.e.,\,}}
+\newcommand{\eg}{\mbox{e.g.,\,}}
+\newcommand{\seq}[1]{\mbox{\ensuremath{#1 = 1, 2, 3, \ldots}}}
+\newcommand{\idx}[1]{\mbox{\ensuremath{1, 2, \ldots, #1}}}
+\newcommand{\samp}[2]{\mbox{\ensuremath{#1_{1}, \ldots, #1_{#2}}}}
+\newcommand{\bibentry}{
+\smallskip
+\noindent
+\hangindent 2em
+\hangafter 1}
+%
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\var}{Var}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\corr}{corr}
+%
+\begin{document}
+<<setup,echo=FALSE,results=hide,cache=TRUE,message=FALSE>>=
+options(width = 90, replace.assign = TRUE)
+knit_hooks$set(fig = function(before, options, envir){
+    if(before && options$fig.show != 'none')
+        par(mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, cex.axis = 0.9,
+            mgp = c(2, 0.7, 0), tcl = -0.3)
+      } )
+require('ggplot2')
+require('plyr')
+require('reshape2')
+require('scales')
+require('rgdal')
+require('maps')
+require('maptools')
+require('rgeos')
+@
+
+
+\title{User-Visible Changes in \texttt{ggplot2-0.9.0}}
+
+\author{ggplot2 Development Team}
+
+\maketitle
+%% ------------------------------------------------------------------
+%% ------------------------------------------------------------------
+
+\section{Overview}
+\label{sec:intro}
+
+Version 0.9.0 of the \pkg{ggplot2} package contains a number of
+changes that are designed to provide a user with more
+flexibility and greater ease of use in the construction of a
+\pkg{ggplot}. The two most evident improvements from a user's
+perspective are: (i) the help
+pages have been expanded considerably, with many new examples; and
+(ii) the computing time has been reduced significantly. Several new
+geoms are introduced, as well as a few new \code{stat\_}
+functions. These will be described in the sections to follow.
+
+This version marks the inception of a renovation project designed
+to off-load groups of related functions into separate packages and
+streamlining the code to produce a more consistent user interface
+across those sets of functions. The
+\pkg{scales} package is the first evidence of this process, but others
+will follow in due course.  Another important decision made in this
+process is to gradually rewrite the core code of the package in S3, which is
+anticipated to have
+two important effects: (i) faster execution of code; (ii) greater
+participation from \pkg{ggplot2} users in the development of the package.
+Moreover, steps have been taken to initiate
+rigorous unit testing to ensure that new and/or revised code is performing as
+expected, with the aim of reducing the probability of bugs in the
+future and faster response time in fixing bugs should they occur. This
+redesign is part of an effort to transition from a single-developer project to
+a user community project.
+
+This document is an extension of the NEWS files in the \pkg{ggplot2}
+and \pkg{scales} packages, describing the changes and new features in
+some detail, in the hope that it will ease the transition for
+existing \pkg{ggplot2} users. The changes that will most directly affect users
+in this version have to do with guides--specifically, positional
+axes, text annotation and legends.
+
+\subsection{Visible changes}
+\label{sec:vischg}
+
+\begin{itemize}
+  \item The help files are now fully documented with many new examples
+    in addition to those already in the on-line help pages.
+  \item \pkg{ggplot2} now has a NAMESPACE, which is required in all
+    \R\ packages as of version 2.14.0. This means, for example, that
+    \pkg{plyr} and \pkg{reshape} will no longer be autoloaded with
+    \pkg{ggplot2}, so you will need to write an \code{Rprofile}
+    function, either at the site level (in RHOME/etc) or in a
+    project directory, if you want to continue loading \pkg{plyr},
+    \pkg{reshape[2]} or other packages at startup. Otherwise, packages
+    must be loaded from the command line.
+  \item \code{scale\_} functions now have a more consistent set of
+    arguments; for example, they all now have arguments \code{breaks},
+    \code{values}, \code{limits}, \code{labels} and
+    \code{name}. Moreover, arguments \code{breaks}, \code{limits} and
+    \code{labels} now accept a function as its value. The positional
+    guide functions \code{scale\_continuous} and \code{scale\_discrete}
+    have an additional argument \code{trans} that also accepts a function as
+    its value. Examples of these are present in the help files and
+    others will be shown in section~\ref{sec:axes}. This is a
+    significant change in the package that may affect existing user code.
+  \item Thanks to the efforts of Kohske Takahashi, two new functions
+    named \func{guide\_legend} and \func{guide\_colorbar} greatly extend
+    the capability of users to tailor legends in a ggplot. The help
+    pages of each have an extensive set of examples, a few of which will be
+    illustrated in section~\ref{sec:guides}.
+  \item Several new geoms are introduced in this package:
+    \func{geom\_map}, \func{geom\_raster}, \func{geom\_dotplot} and
+    \func{geom\_violin}. The latter pair of geoms were developed by
+    Winston Chang. These will be discussed in
+    section~\ref{sec:geoms}, but see their individual help files
+    for more detailed description and examples.
+  \item A new set of fortify methods has been written for objects of
+    class \code{multcomp}. See the help page of
+    \func{fortify.multcomp} for further details.
+  \item Four new \code{stat\_} functions make their debut:
+    \begin{itemize}
+      \item  \func{stat\_summary2d}, which applies a function over a 2D
+        grid of bins;
+      \item \func{stat\_summary\_hex}, which applies a function over a
+        collection of hexagonal bins;
+      \item \func{stat\_bindot}, a \code{stat\_} function that
+        accompanies \func{geom\_dotplot};
+      \item \func{stat\_ydensity}, a \code{stat\_} function that
+        accompanies \func{geom\_violin}.
+    \end{itemize}
+    Each of these has its own help page with accompanying examples.
+  \item Users no longer have to worry about the variable \mbox{name/geom}\
+    name buglet that plagued earlier versions. You can now expect that
+    code like the following will work:
+    \begin{verbatim}
+    ggplot(df, aes(x, y, group = group, colour = color)).
+    \end{verbatim}
+  \item Some users may have noticed that the theme element
+    \func{plot.background} did not work in version 0.8.9 of the
+    package. This has recently been fixed.
+  \item An expanded collection of possible linetypes is introduced in
+    this version. See the help page of \func{aes\_linetype\_size\_shape}
+    for some examples, and the help page of \func{scale\_linetype} for
+    a brief description.
+  \item The \func{facet\_grid} function has a couple of new
+    features. The \code{space = } argument now supports values \code{free\_x}
+    and \code{free\_y}, which allow a user to adjust the spatial
+    scaling of facets in either the horizontal or vertical
+    direction. In addition, the \code{labeller = } argument now
+    accepts a function as its value the \code{margins = }
+    argument now works again. A number of examples are given on
+    the help page of \code{facet\_grid}, but some
+    examples incorporating these changes will be shown in
+    section~\ref{sec:facetgrid}.
+  \item \func{geom\_boxplot} is now capable of rendering notched
+    boxplots. In addition, the new default is for the center line of
+    a boxplot to be thicker than the box and whiskers, using the new argument
+    \code{fatten = }, which defaults to 2. If you want the old
+    behavior, set \code{fatten = 1} in a \func{geom\_boxplot} call.
+  \item A new function \func{ggmissing} visualizes
+    missing data to investigate the plausibility of the `missing at
+    random' assumption. Two other new functions are \func{ggorder},
+    which investigates the order in which observations were recorded,
+    and \func{ggstructure}, which is designed to highlight structural
+    anomalies in numeric multivariate data should they exist.
+  \item Did we mention that graphics rendered in this version is
+    visibly faster than in previous versions?
+\end{itemize}
+
+\subsection{Not so visible changes}
+\label{sec:nsvchg}
+
+As noted in the intro, the package is being reorganized and partially
+rewritten for a number of reasons. These changes don't necessarily
+affect users \emph{per se}, but they do affect current and future
+co-developers. Some of the changes in progress include the following:
+\begin{enumerate}
+  \item The \pkg{roxygen2} package is now being used for documentation
+    of functions in \pkg{ggplot2}. The practical advantage of \pkg{roxygen2} is
+    that it encourages self-documentation of a function as it is being
+    developed.
+  \item A start has been made in applying unit testing to functions in
+    \pkg{ggplot2} and its derivative packages using the \pkg{testthat}
+    package. As more people contribute to the project, testing code in
+    advance becomes increasingly important. It is also a way of
+    making sure that past bugs are fixed and a means of preventing
+    future bugs. This should make code more reliable even as the
+    functionality of the package grows over time.
+  \item In a major design change, the core code of the package is
+    gradually being rewritten in S3 as a replacement for the \pkg{proto}
+    package, which, quite frankly, few \R\ programmers know well. This
+    decision is expected to encourage more developers to join the
+    project and, incidentally, to make the code run a bit faster.
+  \item Another major design decision which will have more visible
+    impact in the future is that of disaggregating the code in
+    \pkg{ggplot2} into packages of related functions, so
+    that eventually, \pkg{ggplot2} will be more like a control center
+    of sorts that picks up necessary pieces from satellite
+    packages and organizes them into a graphic in \pkg{ggplot2}. The
+    goal, however, is more ambitious: certain satellite packages should
+    also work with other graphics engines, including base graphics and
+    the \pkg{lattice} package. The \pkg{scales} package, for example,
+    falls in this category.
+\end{enumerate}
+
+
+\section{\pkg{scales} package}
+\label{sec:scalespkg}
+
+The first step in reorganizing the \pkg{ggplot2} package was to group
+functions that pertain to the construction of guides---\ie axes (or
+positional guides) and legends (aesthetic guides)---into a single
+package. These functions are spun off from the \pkg{ggplot2} package,
+but have been rewritten so that they can be used in base graphics or
+\pkg{lattice} as well. Tangible evidence of this feature is shown
+in the examples of the \func{cscale} and \func{dscale} functions.
+
+The \code{scale\_} functions have been rewritten so that both the
+\texttt{breaks = } and
+\texttt{labels = } arguments accept a function as its `value'. Moreover,
+a set of transformation functions was written to replace
+most of the previously existing \texttt{scale\_*} functions in versions
+of \pkg{ggplot2} through 0.8.9---the only ones that remain in version
+0.9.0 are \func{scale\_continuous}, \func{scale\_discrete}, \func{scale\_reverse},
+\func{scale\_sqrt} and \func{scale\_log10}. All other transformations
+in positional guides are specified through a \code{trans = } argument in
+\func{scale\_continuous} or \func{scale\_discrete} using
+the \pkg{scales} package, or alternatively, using the
+\func{coord\_trans} function\footnote{Although the effect of scale
+  transformations and coordinate transformations may not be the
+  same. See section~\ref{sec:axes} for further explanation.} in
+\pkg{ggplot2}. Furthermore, a set of
+palettes to be used in conjunction with scale functions associated
+with aesthetics is found in this package. The subsections below
+indicate the groups of related functions resident in
+\pkg{scales}. Examples of their use are illustrated in
+section~\ref{sec:axes}.
+
+\subsection{Functions to manage breaks}
+\label{sec:breaks}
+
+The functions available for managing breaks in the \pkg{scales}
+package are:
+\begin{description}
+  \item[date\_breaks()] A function to determine how axis breaks for
+    dates should be set. Its lone argument is \texttt{width = }, which
+    corresponds to a time duration such as '2 weeks' or '4 months'.
+  \item[log\_breaks()] A function to determine breaks for a log scale,
+    which takes two arguments: \texttt{n}, the desired number of
+    breaks (default 5), and \texttt{base}, the base of the logarithm,
+    which defaults to 10.
+  \item[pretty\_breaks()] An implementation of the \func{pretty}
+    function from base \R.
+  \item[trans\_breaks()] A function to specify pretty breaks with
+    respect to a given transformation.
+\end{description}
+
+\subsection{Functions to manage labels}
+\label{sec:labels}
+
+The functions available for managing labels in the \pkg{scales}
+package all end with \code{\_format}:
+\begin{center}
+  \begin{tabular}{lll}
+    \func{comma\_format}  & \func{scientific\_format} &  \func{math\_format} \\
+    \func{dollar\_format} & \func{date\_format} & \func{format\_format} \\
+    \func{percent\_format} & \func{parse\_format} & \func{trans\_format}
+  \end{tabular}
+\end{center}
+The first column of format functions in the above table apply a
+specific character to axis labels: \func{comma\_format} is used to
+separate digits into
+groups of three (going from right to left), \func{dollar\_format}
+prepends a string with a dollar
+sign and \func{percent\_format} multiplies the values by 100
+and then appends a percentage sign at the end.
+
+In the second column of the table, the \func{scientific\_format} function returns
+the (axis tick) values in scientific notation. It has an optional
+\code{digits = } argument, which can be used to specify the number of
+significant digits to display. The \func{date\_format} function is used
+to specify a character string representation of a date object. See
+\texttt{?strptime} for the set of admissible format values. Next, the
+\func{parse\_format} function takes a character string representation
+of an expression and renders it as a \texttt{plotmath} expression in
+the graphic.
+
+The format functions in the third column of the above table are
+designed to provide the user
+with more options in terms of how to represent labels.
+\func{math\_format} allows one to add an arbitrary expression
+to a label, \func{format\_format} provides more control over the
+printed representation of labels and \func{trans\_format} allows
+one to format labels after a transformation has been applied.
+
+Just as one could write a formatter function in previous versions of
+\pkg{ggplot2}, one can create format functions of one's own to pass
+into a scale function. This is also true of the \code{\_trans},
+\code{\_breaks} and \code{\_pal} functions, and a primary reason why
+they were rewritten.
+
+\subsection{Transformation functions}
+\label{sec:trans}
+
+The table below summarizes the available transformation functions in
+the \pkg{scales} package to be used in conjunction with the
+\func{coord\_trans} function in \pkg{ggplot2} or the \code{trans = }
+argument in a positional scale function.
+\begin{center}
+  \begin{tabular}{lll}
+    \func{asn\_trans}  &  \func{identity\_trans}  &  \func{probit\_trans} \\
+    \func{atanh\_trans} & \func{log1p\_trans} & \func{reciprocal\_trans} \\
+    \func{boxcox\_trans} & \func{log\_trans}  & \func{reverse\_trans}  \\
+    \func{date\_trans}  & \func{logit\_trans} & \func{sqrt\_trans}  \\
+    \func{exp\_trans}  & \func{probability\_trans} & \func{time\_trans}
+  \end{tabular}
+\end{center}
+Many of these functions have been transferred from \pkg{ggplot2} to
+\pkg{scales} and rewritten to have a consistent form so that it will
+be easier for users to define their own transformation functions. The
+simplest pattern for a transformation function is
+\begin{verbatim}
+my_trans <- function()
+   trans_new('my', function(x) ..., function(x) ...)
+\end{verbatim}
+where the first argument is the name of the transformation, the second
+argument is the function corresponding to the transformation and the
+third argument is its inverse function. The ellipses are placeholders
+for the function definitions. Two examples are illustrated
+below: the arcsine transformation and the slightly more complicated
+logarithmic transformation:
+<<arcsine,echo=TRUE>>=
+asn_trans
+log_trans
+@
+
+\subsection{Palette functions}
+\label{sec:pal}
+
+This set of functions in the \pkg{scales} package is primarily for use
+with scale functions corresponding to plot attributes such as color,
+hue, linetype or character shape. The palettes associated with color
+and fill are:
+\begin{center}
+  \begin{tabular}{ll}
+    \func{brewer\_pal}  &  \func{grey\_pal}  \\
+    \func{dichromat\_pal} & \func{hue\_pal}   \\
+    \func{div\_gradient\_pal} & \func{seq\_gradient\_pal} \\
+    \func{gradient\_n\_pal}  &   \\
+  \end{tabular}
+\end{center}
+Palettes associated with gradients imply a continuous color scale; the
+others are used with discrete color scales. In particular,
+\begin{enumerate}[(a)]
+  \item \func{brewer\_pal} is a function for use
+    with discrete ColorBrewer palettes (see \url{http://colorbrewer2.org/} for
+    examples). The \pkg{RColorBrewer} package needs to be loaded
+    in order to access the suite of ColorBrewer palettes in \pkg{ggplot2}.
+  \item \func{dichromat\_pal} is a function to select a discrete color
+    palette from a set that dichromate individuals (those with a
+    specific type of color blindness) can distinguish easily.
+  \item \func{grey\_pal} accesses a discrete greyscale color palette.
+  \item \func{hue\_pal} defines a discrete palette on an HCL scale
+    (hue, chroma and luminance).
+  \item \func{div\_gradient\_pal} sets up a diverging continuous color gradient,
+    \func{seq\_gradient\_pal} a sequential continuous color gradient,\
+    and \func{gradient\_n\_pal} combines the \func{scale\_gradientn} and
+    \func{scale\_gradient2} functions from earlier versions of
+    \pkg{ggplot2}, although both of the latter functions still exist
+    in 0.9.0.
+\end{enumerate}
+
+Palettes associated with other aesthetics include the following:
+\begin{center}
+  \begin{tabular}{ll}
+  \func{area\_pal}  & \func{manual\_pal} \\
+  \func{identity\_pal} & \func{rescale\_pal} \\
+  \func{linetype\_pal} & \func{shape\_pal}
+  \end{tabular}
+\end{center}
+One could include the alpha transparency function \func{alpha} in
+this set as well.
+\begin{description}
+  \item[\func{area\_pal}] defines a continuous range of point sizes,
+    where proportional changes in point size correspond to changes in
+    area rather than changes in radius. For example, a doubling of the
+    area of a circle corresponds to an increase of $\sqrt{2}$ in the
+    radius. In many graphs (\eg bubble plots), this may be a preferred
+    scaling of size.
+  \item[\func{identity\_pal}] is used when the desired scale values are
+    the data values themselves.
+  \item[\func{linetype\_pal}] accesses a palette of line
+    types developed by Richard Pearson from the University of Manchester.
+  \item[\func{manual\_pal}] is a function that allows a user to
+    manually specify a vector of attribute values.
+  \item[\func{rescale\_pal}]  allows a user to rescale a continuous
+    palette somewhere within the interval $[0, 1]$.
+  \item[\func{shape\_pal}] is a binary function with one argument that
+    is used to declare whether shapes should be solid or not (default TRUE).
+  \item[\func{alpha}] is a function to define alpha transparency. It
+    takes two arguments: a (vector of) color(s) and a (vector of)
+    alpha transparency value(s). The restriction is that if you
+    specify a vector of colors, then the alpha transparency must be a
+    fixed constant; conversely, if you specify a vector of alpha
+    transparencies, then the color must be fixed. The combination that
+    doesn't work is a vector of colors and a vector of transparencies.
+\end{description}
+
+Most of the time there is no need to use these functions with
+\pkg{ggplot2} graphics since the package already has built-in
+functions that incorporate these palettes. More often, one would use
+them in conjunction with the \func{cscale} and \func{dscale} functions
+in the \pkg{scales} package using base or Lattice graphics.
+
+\section{Scaling x- and y-axes}
+\label{sec:axes}
+
+Axes are positional guides that contain a \emph{scale}, a
+\emph{label}, a \emph{rule} and usually, a \emph{title}. The
+fundamental difference between axes and legends is that axes are
+transformable whereas legends are not (Wilkinson, 2005). As a result,
+the \func{scale\_continuous} and \func{scale\_discrete} functions in
+\pkg{ggplot2} now take a \code{trans = } argument, but scale functions
+for legends (\eg, \func{scale\_colour\_*} or \func{scale\_linetype}) do not.
+The \code{trans = } argument in a discrete or continuous scale
+function corresponds to the scale transformation to be applied to the
+variable of interest prior to any statistical transformation.
+
+\subsection{\code{\_breaks} functions for defining axis breaks}
+\label{sec:brkex}
+
+The \func{*\_breaks} set of functions
+controls the values that define the rule, which may be formatted by one
+of the \func{*\_format} functions introduced in
+section~\ref{sec:labels} to produce the labels. For dates
+and/or times, one can use the \func{scale\_date} or
+\func{scale\_datetime} functions, which also allow the \code{breaks = }
+and \code{labels = } arguments to take functions as `values'. The most
+common applications for \code{\_breaks} functions are specification of
+date intervals and breaks for a log scale of arbitrary base.
+
+Here are some examples using breaks; the last one uses a different
+date format to avoid overlapping of date labels.
+<<date-breaks-ex1,fig.width=5,fig.height=2,message=FALSE,cache=TRUE>>=
+DF <- data.frame(dates = seq(as.Date('2009-01-01'), as.Date('2010-09-30'), by = '1 day'),
+                 y = rnorm(638))
+p <- ggplot(DF, aes(x = dates, y = y)) +
+        geom_path() + opts(aspect.ratio = 0.3)
+p
+@
+\noindent A couple of examples with breaks over four and nine months, respectively:
+<<date-breaks-ex2,fig.width=5,fig.height=2.3,message=FALSE,cache=TRUE>>=
+p + scale_x_date(breaks = date_breaks('4 months'),
+                 labels = date_format('%Y-%m'))
+p + scale_x_date(breaks = date_breaks('9 months'))
+@
+\noindent An example with breaks by 10 weeks but different labeling calls:
+<<date-breaks-ex3,fig.width=5,fig.height=2.3,message=FALSE,cache=TRUE>>=
+p + scale_x_date(breaks = date_breaks('10 weeks'))
+p + scale_x_date(breaks = date_breaks('10 weeks'),
+                 labels = date_format('%Y\n%b %d'))
+@
+
+The following example is based on a pseudo-random sample from a
+lognormal distribution where a histogram is the statistical
+transformation of interest. This will provide an
+opportunity to play around with a few of the breaks functions.
+
+The graph on the left below is a histogram on the original scale while
+the one on the right is computed from the natural logarithm of the
+original measurements.
+<<lognormal-ex1,fig.width=4,fig.height=3,message=FALSE,cache=TRUE,out.width=.45\textwidth,fig.show=hold>>=
+DF <- data.frame(x = rlnorm(1000, m = 10, sd = 5))
+# on original scale, produces a spiked histogram
+(p <- ggplot(DF, aes(x = x)) + geom_histogram())
+# Apply a scale transformation to x to get the histogram of ln(x):
+p + scale_x_continuous(trans = 'log')
+@
+The tick marks in the above histograms are rather ugly, so let's try a
+few things by playing with breaks and labels. There are two breaks
+functions one could use for starters: \func{pretty\_breaks} and
+\func{log\_breaks}. The former would be used on $\log x$ while the
+latter would be used on $x$. They don't yield the same set of breaks:
+<<lognormal-breaks,echo=TRUE>>=
+(lb <- pretty_breaks()(log(DF$x)))
+(lc <- log(log_breaks(base = exp(1))(DF$x)))
+@
+\noindent Note that \code{log\_breaks(base = exp(1))(DF[['x']])} yields the numeric values of $e^{-6}$, $e^1$, etc.
+
+Let's suppose we want to label the horizontal axis so that the labels
+are of the form $e^x$, where $x$ is an integer. There are a few ways
+to do this, some easier than others.
+
+The simplest thing to do is to transform $x$ in the \func{ggplot} call
+and use \func{math\_format} to get the desired labels. The token
+\code{.x} is a placeholder for the value within \func{math\_format}.
+<<logtransform-histogram,fig.width=4,fig.height=3,fig.align=center,message=FALSE,cache=TRUE>>=
+q <- ggplot(DF, aes(x = log(x))) + geom_histogram()
+q + scale_x_continuous(labels = math_format(e^.x)) + xlab('x')
+@
+
+
+If we don't transform $x$ in the \func{ggplot} call, then we have to
+work a bit harder. Here are some options:
+\begin{itemize}
+  \item specify a vector of breaks and use it in \func{scale\_x\_continuous};
+  \item use the \func{log\_breaks} function in concert with
+    \func{trans\_format} to get the labels, again within
+    \func{scale\_x\_continuous};
+  \item use \func{trans\_breaks} to get the breaks and
+    \func{trans\_format} to produce the labels within \func{scale\_x\_continuous}.
+\end{itemize}
+
+In the left plot below, the breaks vector \code{lb} is passed in to
+determine the (linear) breaks, and its logarithm is the set of values
+to be passed in as the second argument set of \func{math\_format}. In
+the plot on the right, the \func{log\_breaks} function takes care of the
+breaks and the \func{trans\_format} function produces the proper
+labels. However, the break points are not the same in the two plots
+and neither one is ideal.
+<<breaks-after-transform-ex1,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+p + scale_x_continuous(trans = 'log', breaks = lb,
+                       labels = math_format(e^.x)(log(lb)))
+p + scale_x_continuous(trans = 'log', breaks = log_breaks(base = exp(1)),
+                       labels = trans_format('log', math_format(e^.x)))
+@
+
+The last method uses all the \code{trans\_} functions to get the same
+plot as the first one we created:
+<<breaks-after-transform-ex2,fig.width=4,fig.height=3,fig.align=center,message=FALSE,cache=TRUE>>=
+p + scale_x_continuous(trans = 'log', breaks = trans_breaks('log', 'exp'),
+                       labels = trans_format('log', math_format(e^.x)))
+@
+\noindent This is the `correct' way to manipulate breaks and labels in
+0.9.0 in concert with the \pkg{scales} package.
+
+Recall that \pkg{ggplot} object \code{p} was based on the original sample. To
+generate the plot, a log transformation is applied to the data,
+the \func{trans\_breaks} function generates `pretty' breaks in the log
+scale and \func{trans\_format} uses those breaks to produce the labels
+using the format given in \func{math\_format}. If you try
+the above call without \func{math\_format}, it will provide pretty
+linear breaks in the log scale by default, which is a sensible scaling
+\emph{in natural log units}. This also gives the same
+plot as ggplot object \code{q} with the added \func{scale\_x\_continuous} code.
+
+There are a few things about the exponential labels that bear
+mention. Firstly, they are rather misleading for a couple of reasons:
+\begin{enumerate}[(i)]
+  \item The breaks are linear in the log scale, not the original
+    scale, but the labels are conformant with the original scale, as
+    is the axis title.
+  \item If one were to use the breaks on the original scale (see the
+    spiked histogram of the original data), then all of the axis ticks
+    and labels would be squished together on the right side of the plot.
+\end{enumerate}
+Neither of these options is compelling from a visual standpoint. To
+see the tick values on the original scale, type
+\code{pretty\_breaks()(DF[['x']])}. The default behavior of
+\pkg{ggplot2} in this case is more visually consistent and recommended
+for most uses. That said, the point of the exercise was to play with
+the \func{\_format} functions, and we've done that.
+
+Here's a similar example that was discussed on the \pkg{ggplot2} list
+recently, using the diamonds data with the \func{scale\_x\_log10} function:
+<<diamonds-log10trans-labeling,echo=TRUE,fig=TRUE,fig.width=4,fig.height=2.8,out.width=.45\textwidth,fig.show=hold,message=FALSE,cache=TRUE>>=
+dsmall <- diamonds[sample(nrow(diamonds), 1000), ]
+## default scaling
+qplot(carat, price, data = dsmall, alpha = I(0.2)) +
+scale_x_log10()
+## log-linear scaling with labeling using math_format()
+qplot(carat, price, data = dsmall, alpha = I(0.2)) +
+   scale_x_log10(breaks = trans_breaks('log10', function(x) 10^x),
+                 labels = trans_format('log10', math_format(10^.x)))
+@
+The same points that applied in the previous graph apply here as
+well. There is a compelling argument one can make that the breaks in
+the left plot are more indicative of the original carat values when
+the plot is rendered in the $\log_{10}$ scale.
+
+\subsection{Scale and coordinate transformations}
+
+The distinction between scale and coordinate transformations is that
+scale transformations take place \emph{before} any
+statistics are computed, whereas coordinate transformations take place
+\emph{afterward}. In the examples below, there is no difference in appearance
+between apposing pairs of plot calls because no statistical
+transformation takes place. However, when summary geoms are plotted
+(\eg \func{geom\_histogram} or \func{geom\_density}), there will often be a
+difference in appearance depending on when the transformation is applied.
+<<proportions-plot,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE>>=
+# y is a vector of proportions
+df1 <- data.frame(x = 1:10, y = round(runif(10), 3))
+qplot(x, y, data = df1)
+@
+Two ways of plotting the $\sin^{-1}$ transformation of y:
+<<arcsin-trans,fig.width=4,fig.height=2.8,out.width=.45\textwidth,fig.show=hold,message=FALSE,cache=TRUE>>=
+qplot(x, y, data = df1) + scale_y_continuous(trans = 'asn')
+qplot(x, y, data = df1) + coord_trans(ytrans = 'asn')
+@
+Ditto for the logit transformation of y:
+<<logit-trans,echo=TRUE,fig=TRUE,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+qplot(x, y, data = df1) + scale_y_continuous(trans = 'logit')
+qplot(x, y, data = df1) + coord_trans(ytrans = 'logit')
+@
+
+The lognormal example from the previous section shows this game
+doesn't always work. Run this code in an \R\ session---the second plot
+call throws an error:
+<<lognorm-trans,echo=TRUE,eval=FALSE>>=
+p + scale_x_continuous(trans = 'log')
+p + coord_trans(xtrans = 'log')
+@
+In other words, you need to exercise some care when using scale
+transformations \emph{vis \'{a} vis} coordinate transformations, as
+they are not the same thing when statistical transformation of the
+data is involved (in this case, a histogram).
+
+Here is an example from the \func{coord\_trans} help page to
+illustrate the difference between scale transformations prior to model
+fitting and coordinate transformations after a model fit. This is one
+type of graphic that could not be produced easily prior to version 0.9.0.
+<<scale-trans-distinction,dev=png,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+d <- subset(diamonds, carat > 0.5)
+## Scale transformation prior to model fitting
+qplot(carat, price, data = d, log="xy", alpha = I(0.05)) +
+   geom_smooth(method="lm", size = 1)
+## Coordinate transformation after model fitting
+qplot(carat, price, data = d, alpha = I(0.05)) +
+   geom_smooth(method="lm", size = 1) +
+   coord_trans(x = "log10", y = "log10")
+@
+In the first graph above, the $x$ and $y$ axes were both
+log-transformed and then a linear model was fit in the transformed
+scales. In the second graph, the linear model was fit to the original
+data first and then the $x$ and $y$ axes were
+log-transformed. Mathematically, the fitted linear model in the first
+graph has the form $\widehat{\log y} = b_0 + b_1 \log x$, whereas the
+fitted model in the second graph is $\log \hat{y} = \log(b_0 + b_1
+x)$, which happens to be a transform-both-sides model (Carroll and
+Ruppert, 1987) since the same coordinate transformation was applied to
+both sides of the fitted model.
+
+Separate transformations for $x$ and $y$ are also possible:
+<<indep-trans,dev=png,fig.width=4,fig.height=3,message=FALSE,cache=TRUE>>=
+qplot(carat, price, data = d, alpha = I(0.05)) +
+   geom_smooth(method="lm", size = 1) +
+   coord_trans(x = "log10", y = "sqrt")
+@
+
+\subsection{\code{\_format} functions for labelling axes}
+
+The following set of examples illustrates how some of the labeling
+functions work, although we had a sneak preview in section~\ref{sec:brkex}.
+
+The left plot below uses a dollar label for price, whereas the right plot
+renders percentage labels (note that depth is divided by 100
+since the percent\_format() function multiplies the value by 100
+before appending the percent sign). Note that the dollar format code
+fails at present because of a known bug which is in the process of
+being fixed. However, the code itself is correct.
+<<axis-labels-ex1,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+dsmall <- diamonds[sample(seq_len(nrow(diamonds)), 1000), ]
+# dollar labels
+qplot(cut, price, data = dsmall) + scale_y_continuous(labels = dollar)
+qplot(table, depth/100, data = dsmall) +
+    scale_y_continuous('Total depth percentage', labels = percent)
+@
+The next two plots illustrate \func{comma\_format}; sometimes you need
+to tell the function the number of digits in the maximum value label
+to avoid scientific notation in some of the labels.
+<<axis-labels-commas,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+ggplot(diamonds, aes(x = price)) + geom_histogram() +
+    scale_y_continuous(labels = comma)
+last_plot() + scale_y_continuous(labels = comma_format(digits = 5))
+@
+In previous versions, these would have been handled with the
+\code{formatter = } argument in \func{scale\_continuous} or
+\func{scale\_discrete}. This change may affect previously written code.
+
+The next few examples illustrate the \func{math\_format} function. The
+first pair illustrates how to apply math notation in axis labels:
+<<axis-labels-math1,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+d <- data.frame(x = 1:10, y = 1:10)
+## Math notation in labels
+ggplot(d, aes(x, y)) + geom_point() +
+  scale_x_continuous(breaks = 1:10, labels = math_format(alpha + .x)(1:10))
+## Define a vector of breaks manually:
+lb <- seq(1, 9, by = 2)
+last_plot() + scale_x_continuous(breaks = lb, labels = math_format(beta^.x)(lb))
+@
+\noindent The next pair of plots are identical, with two slightly different ways of applying
+\func{math\_format}:
+<<axis-labels-math2,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+lv <- c('alpha', 'beta', 'gamma', 'delta')
+d1 <- data.frame(g = factor(rep(lv, each = 100), levels = lv),
+                 gp = factor(rep(c('A', 'B'), each = 50)),
+                 y = rnorm(400))
+ggplot(d1, aes(x = g, y = y)) +
+    geom_boxplot(fill = 'cornsilk', outlier.colour = NA) +
+    geom_point(position = position_jitter(width = 0.1), alpha = 0.2) +
+    scale_x_discrete(labels = math_format(.x)(levels(d1$g)))
+last_plot() + scale_x_discrete(labels = math_format(.x)(lv))
+@
+These examples illustrate that the \func{\_format} functions are
+`second-order' \R\ functions---\ie they can take two sets of
+arguments. For example, \code{math\_format(.x)} returns a
+function---the second argument \code{(lv)} is a call to that function.
+
+Some \pkg{ggplot2} users have found date formatting to be rather
+vexing in the past, so now there are two functions in the \pkg{scales} package
+that should make it easier to specify date formats. The
+\func{date\_breaks} function defines the time interval between adjacent
+breaks while the \func{date\_format} function specifies how the dates
+should be displayed on the time axis. As mentioned earlier, the syntax
+for individual date elements such as years, days and months is
+described in \code{?strptime}. The following example comes from the
+\code{economics} data frame in \pkg{ggplot2} where we investigate some
+features of \func{date\_breaks} and \func{date\_format}.
+<<date-breaks-labels-ex4,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+qplot(date, psavert, data = economics, geom = 'line') +
+    labs(x = 'Year', y = 'Personal savings rate')
+last_plot() + scale_x_date(breaks = date_breaks('5 years'),
+                           labels = date_format('%Y'))
+@
+The \code{psavert} variable represents a percentage, so we need to
+divide it by 100 before applying \code{percent\_format()} to it:
+<<date-breaks-labels-ex5,fig.width=4,fig.height=2.8,fig.align=center,message=FALSE,cache=TRUE>>=
+qplot(date, psavert/100, data = economics, geom = 'line') +
+    labs(x = 'Year', y = 'Personal savings rate') +
+    scale_x_date(breaks = date_breaks('5 years'),
+                 labels = date_format('%Y')) +
+    scale_y_continuous(labels = percent)
+@
+\noindent The equivalent code in version 0.8.9 for the last plot would be
+\begin{verbatim}
+qplot(date, psavert/100, data = economics, geom = 'line') +
+     labs(x = 'Year', y = 'Personal savings rate') +
+     scale_x_date(major = '5 years') +
+     scale_y_continuous(formatter = 'percent')
+\end{verbatim}
+
+The idea behind \func{\_format} functions is to be more consistent in
+the set of arguments used across the
+set of \func{scale\_*} functions. Observe how the arguments in the 0.9.0
+code for \func{scale\_x\_date} and \func{scale\_y\_continuous} are closer
+to those in, for example, \func{scale\_colour\_manual} or
+\func{scale\_size}. This is intentional.
+
+As noted earlier, the functions
+in the \pkg{scales} package that end in \func{\_breaks} are designed to
+provide a more consistent interface with respect to the way breaks are defined
+across different scale functions. Similarly, the functions
+ending in \func{\_format} are intended to replace formatters in earlier
+versions of \pkg{ggplot2}.
+
+
+\section{Legends}
+\label{sec:guides}
+
+Control over legends is greatly expanded in version 0.9.0, largely due
+to the efforts of Kohske Takahashi. The two functions that will be
+discussed in this section are \func{guide\_legend} and \func{guide\_colorbar}.
+
+In the grammar of graphics, there are two types of guides: scale
+guides and annotation guides. In the former group lie positional guides,
+discussed in section~\ref{sec:axes}, and legends, discussed herein. Legends are
+associated with aesthetics corresponding to plot attributes such as
+color, fill color, size, line type or plotting character shape. One
+can still use the \code{scale\_*()} functions as before (\eg
+\func{scale\_fill\_manual} or \func{scale\_colour\_brewer}), but the new
+functions provide the user with more control over aspects of the
+legend display. Both functions have numerous examples in their
+respective help pages that illustrate each argument at least once, so
+we will show only a few that might occur more commonly in practice.
+
+\subsection{\func{guide\_legend}}
+\label{sec:legend}
+
+This function provides a user with several options to control
+features of a legend, including titles, labels,
+the height and width of legend keys, the direction of the legend and several
+other options that are useful when a large number of
+categories exist. There are several ways in which this
+function can be applied, so let's consider some examples to illustrate
+its usage. We will see that \func{guide\_legend} is not used as a
+primary function, but rather as the `value' of an argument inside
+another function, much like the various functions from the
+\pkg{scales} package discussed in section~\ref{sec:scalespkg}.
+
+One way in which \func{guide\_legend} is called is in conjunction with
+the new \func{guides} function. In the following example using the
+\code{diamonds} data, the factor clarity is the fill aesthetic for
+which a legend is to be built. The call to \func{guide\_legend} is
+the value of the \code{fill = } argument of \func{guides}. This
+syntax allows you to tailor one or multiple legends in one call. Think
+of \func{guides} as being analogous to the function \func{labs}, where
+each argument of \func{guides} is an aesthetic for which a legend
+is to be specified and \func{guide\_legend} provides the arguments to
+be changed within an individual legend. One can specify a call to
+\func{guides} with multiple legends, each of which may have its own
+call to \func{guide\_legend}.
+<<guide-legend-ex1,fig.width=4.5,fig.height=3.5,fig.align=center,message=FALSE,cache=TRUE>>=
+q <- ggplot(diamonds, aes(x = table, fill = clarity))
+# Create two rows of legend labels and increase the size of the
+# legend title font
+q + geom_histogram() +
+    scale_y_continuous(labels = comma_format(digits = 5)) +
+    guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
+                    title.theme = theme_text(size = 12, face = 'bold'))) +
+    xlim(45, 75)
+@
+
+This is nearly the same plot as above, but now we use
+\func{scale\_fill\_discrete} with a \code{guide = } argument, whose
+value is a \func{guide\_legend} call. The \code{guide = } argument is
+specific to scale functions for aesthetics, just as \code{trans = } is
+specific to positional scale functions.
+<<guide-legend-ex2,fig.width=4.5,fig.height=3.5,fig.align=center,message=FALSE,cache=TRUE>>=
+q + geom_histogram() +
+    scale_fill_discrete(guide = guide_legend(nrow = 4, title.position = 'right',
+    title.theme = theme_text(size = 12, face = 'bold'))) +
+    xlim(45, 75)
+@
+The following example concerns an application that comes up occasionally
+on the ggplot2 list: overriding the alpha transparency value in
+the legend so that the aesthetics are visible in the legend key. The
+relevant argument is \code{override.aes}: in the left side plot, the
+very low alpha value makes it difficult to see the legend key items, but
+\code{override.aes} resets the alpha value in the legend for the right side plot.
+<<guide-legend-ex3,dev=png,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+(p3 <- qplot(carat, price, data = diamonds, colour = color,
+  alpha = I(1/100)))
+p3 + guides(colour = guide_legend(override.aes = list(alpha = 1)))
+@
+
+
+\subsection{\func{guide\_colorbar}}
+\label{sec:colorbar}
+
+The new function \func{guide\_colorbar} is designed for continuous ranges
+of (fill) colors---as its name implies, it renders a rectangle over
+which the color gradient varies, while providing more flexibility to
+the user in terms of the labeling and positioning of guide
+elements. At this time, it is applicable to \func{scale\_fill\_continuous} and
+\func{scale\_colour\_continuous} only; in particular, it does not work
+with the size aesthetic on its own. The examples on the
+\func{guide\_colorbar} show how the
+function works with \func{geom\_tile}, so an immediate application of
+this function is to heatmaps. Here is a simple example from the help page:
+<<guide-colorbar-ex1,fig.width=4.5,fig.height=3.5,fig.align=center,message=FALSE,cache=TRUE>>=
+df2 <- reshape2::melt(outer(1:4, 1:4), varnames = c("X1", "X2"))
+p1 <- ggplot(df2, aes(X1, X2)) + geom_tile(aes(fill = value)) +
+           geom_point(aes(size = value))
+@
+\noindent Three equivalent ways to invoke the colorbar are:
+<<guide-colorbar-invocation,echo=TRUE,eval=FALSE>>=
+p1 + scale_fill_continuous(guide = "colorbar")
+p1 + scale_fill_continuous(guide = guide_colorbar())
+p1 + guides(fill = guide_colorbar())
+@
+\noindent We illustrate the first method below along with a companion plot that
+specifies a couple of arguments in \func{guide\_colorbar}:
+<<guide-colorbar-ex2,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+p1 + scale_fill_continuous(guide = "colorbar")
+p1 + guides(fill = guide_colorbar(barwidth = 0.5, barheight = 10))
+@
+The examples above indicate that if the fill and size aesthetics are
+both associated with the same variable and both render a legend, the
+legends can be merged into one. We saw this with the plot of \code{p1}
+at the top of this subsection. However, if one aesthetic uses a legend
+guide and another uses a colorbar guide, the two cannot be merged,
+even if both aesthetics correspond to the same variable. This is clear
+from the two plots above.
+
+An equivalent way of calling the left side plot above is
+<<guide-colorbar-ex2a,echo=TRUE,eval=FALSE>>=
+p1 + guides(fill = "colorbar", size = "legend")
+@
+
+Colorbars can also be used with a continuous color aesthetic; here is
+an example from the built-in data frame \code{mpg}:
+<<guide-colorbar-ex3,fig.width=4.5,fig.height=3.5,fig.align=center,message=FALSE,cache=TRUE>>=
+ggplot(mtcars, aes(x = disp, y = mpg, colour = wt)) + geom_point() +
+   scale_colour_gradientn(colours = topo.colors(10), guide = 'colorbar')
+@
+In this case, we wanted to use the \code{colour\_gradientn} scale
+function to determine the color range. The \code{guide = } option in
+any of the \code{scale\_colour\_*()} functions allows one to specify a
+colorbar in place of a legend.
+
+
+\section{New geoms}
+\label{sec:geoms}
+
+This version of ggplot2 introduces several new geoms: \func{geom\_map},
+\func{geom\_raster}, \func{geom\_dotplot} and \func{geom\_violin}, the
+latter two of which were developed by Winston Chang.
+
+\subsection{\func{geom\_map}}
+
+This function is designed to simplify the construction of choropleth
+maps in \pkg{ggplot2}. A simple example comes from the help page,
+which requires the \pkg{maps} package.
+<<geom-map-crimes,fig.width=4,fig.height=4,fig.align=center,message=FALSE,cache=TRUE>>=
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+states_map <- map_data("state")
+ggplot(crimes, aes(map_id = state)) +
+    geom_map(aes(fill = Murder), map = states_map) +
+    expand_limits(x = states_map$long, y = states_map$lat) +
+    guides(fill = guide_colorbar(colours = topo.colors(10))) +
+    opts(legend.position = 'top')
+@
+
+A more interesting example is one that imports a map file from one
+source and a data file from another. The following is an adaptation of
+an example posted by Tom Hooper on the ggplot2 list in 2010. The code
+takes some time to run, so I wouldn't suggest running it yourself
+unless you are really, really curious, but links to the data and code are given
+below in case you want to try it. The world map borders can be
+found at \url{http://dl.dropbox.com/u/57587928/TM_WORLD_BORDERS-0.3.zip} and
+the file of electricity generation data by country is found at
+\url{http://dl.dropbox.com/u/57587928/Total_Electricity_Net_Generation.csv}
+The zip file should be unpacked first in a directory and it's probably
+a good idea to keep the csv file in the same directory. The
+\pkg{rgdal} needs to be loaded to run \func{readOGR}; the first
+argument of the function is the directory that holds the unzipped
+world borders file.
+<<geom-map-elecmap,echo=TRUE,eval=FALSE>>=
+# replace this with the directory that holds the world borders
+# shapefiles and the electricity generation data
+setwd('/path/to/shapefiles')
+world.map <- readOGR(layer="TM_WORLD_BORDERS-0.3")
+## a good idea if you want to reuse the map data
+# save(world.map, file = "worldmap.Rdata")
+### Aside: to read it back in later,
+## library('maptools')
+## gpclibPermit()
+## load('worldmap.Rdata')
+gpclibPermit()
+# Convert map data to data frame using fortify() for spatial objects
+world.ggmap <- fortify(world.map, region = "NAME")
+# Read in the global electricity generation data
+# Assumes the working directory holds this data file - if not,
+# modify the path
+elect.gen.tot <- read.csv(
+   "Total_Electricity_Net_Generation.csv", sep = ",", dec = ".")
+names(elect.gen.tot) <- c("id", "y2004", "y2005", "y2006", "y2007", "y2008")
+# Plot the choropleth map
+ggplot(elect.gen.tot, aes(map_id = id)) +
+    geom_map(aes(fill = log(y2007)), map = world.ggmap) +
+    expand_limits(x = world.ggmap$long, y = world.ggmap$lat) +
+    scale_fill_gradient(low = 'orange', high = 'blue', guide = 'colorbar')
+@
+
+Another common source of map files is \url{gadb.org}, which
+contains administrative map files in \code{.Rdata} format. Not all of
+these maps are up to date, however, so you need to check the validity
+of any map downloaded. Here is
+some code for plotting regions of Japan from a recent question on the
+ggplot2 list, courtesy of Charlotte Wickham, and adapted to 0.9.0 for
+use with \func{geom\_map}. Once again, the code is not run, but you can
+copy and paste it into your \R\ session---just be willing to wait a
+few minutes for all of it to process, since this is a detailed
+administrative map.
+<<geom-map-japanmap,echo=TRUE,eval=FALSE>>=
+load(url("http://gadm.org/data/rda/JPN_adm2.RData"))
+gpclibPermit()
+# convert to a structure ggplot2 can handle...takes a while
+japan_map <- fortify(gadm, region = "ID_2")
+# manufacture a fake data frame of values to use in geom_map()
+vals <- data.frame(id = unique(japan_map$id), val = rpois(1811, 5))
+ggplot(vals, aes(map_id = id)) + geom_map(aes(fill = val), map = japan_map) +
+   expand_limits(x = japan_map$long, y = japan_map$lat) +
+   scale_fill_continuous(guide = 'colorbar')
+@
+
+\textbf{Warning:} At present, there is a bug in \func{geom\_map}. In
+its current incarnation, the values are not being mapped correctly to
+the regions/polygons. The bug has been reported. The code above should
+work properly when the function is fixed.
+
+\subsection{\func{geom\_raster}}
+
+This function is a more efficient version of
+\func{geom\_tile}, meant to be used when all of the tiles are the same
+size. Here is an example, slightly modified from its help page:
+<<geom-raster-ex1,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+pp <- function (n,r=4) {
+ x <- seq(-r*pi, r*pi, len=n)
+ df <- expand.grid(x=x, y=x)
+ df$r <- sqrt(df$x^2 + df$y^2)
+ df$z <- cos(df$r^2)*exp(-df$r/6)
+ df
+}
+base <- ggplot(pp(200), aes(x, y, fill = z))
+base + geom_raster()
+base + geom_raster() +
+    scale_fill_gradientn(colours = terrain.colors(10), guide = 'colorbar')
+@
+
+\noindent The following code uses \func{geom\_raster} to plot a correlation matrix:
+<<geom-raster-ex2setup,echo=TRUE>>=
+# Create a random matrix of 10 columns (variables)
+m <- matrix(rnorm(1000), nrow = 100,
+            dimnames = list(NULL, paste('X', 1:10, sep = '')))
+# Compute the correlation matrix
+cmat <- cor(m)
+# Melt it into a data frame
+cmatm <- melt(cmat)
+# Create two new numeric variables by stripping off the X's in the
+# two factor variables Var1 and Var2:
+cm1 <- mutate(cmatm, X1 = as.numeric(gsub('^X', '', cmatm$Var1)),
+                      X2 = as.numeric(gsub('^X', '', cmatm$Var2)))
+@
+\noindent Two different ways of producing a corrplot are shown below.
+<<geom-raster-ex2-corrplot,fig.width=4,fig.height=2.8,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+ggplot(cm1, aes(X1, X2, fill = value)) + geom_raster() + scale_y_reverse()
+last_plot() + scale_fill_continuous(low = 'black', high = 'pink', guide = 'colorbar')
+@
+
+\subsection{\func{geom\_dotplot}}
+
+This function is an implementation of a Wilkinson dot plot. The help
+page of this function has an extensive set of examples that covers
+all of its basic features, a selected sample of which is included here
+for illustration.
+
+In the code chunk below, the plot on the left is a dot plot with the
+default binwidth (range/30), while the second sets the maximum binwidth
+to be 1.5. One way to occupy
+more graphics space for a single dot plot may be to stack the points
+in a dot plot relative to the center of the graphics region on the y-scale,
+which is what the third plot does. There is a problem with univariate
+dot plots, however: the vertical axis labels are arbitrary and
+are difficult to tailor for the situation at hand. In the center plot,
+the vertical axis ticks are eliminated, which is one way
+(not necessarily the best) of handling the problem.
+<<geom-dotplot-ex1,fig.width=3,fig.height=3,message=FALSE,cache=TRUE,out.width=0.31\textwidth,fig.show=hold>>=
+p <- ggplot(mtcars, aes(x = mpg))
+p + geom_dotplot()
+p + geom_dotplot(binwidth = 1.5) + scale_y_continuous(breaks = NA)
+p + geom_dotplot(binwidth = 1.5, stackdir = "center")
+@
+
+The plots above use the default binning method \code{dotdensity} for the dot
+plot display, which fixes the \emph{maximum} binwidth; the default, as
+you will be notified when using it, is one-thirtieth of the range of values.
+The other method of binning, illustrated in the far left
+plot below, is \code{histodot}, which fixes the binwidth at a
+specific value. The center plot below reverts to using the dotdensity
+method of binning but increases the size of the individual dots. The plot
+on the far right bins relative to the vertical center of the graphics region.
+<<geom-dotplot-ex2,fig.width=3,fig.height=3,message=FALSE,cache=TRUE,out.width=0.31\textwidth,fig.show=hold>>=
+p + geom_dotplot(method="histodot", binwidth = 1.5)
+p + geom_dotplot(binwidth = 1.5, dotsize = 1.25)
+p + geom_dotplot(binwidth = 1.5, stackdir = "centerwhole")
+@
+
+Much like box plots, a dot plot is a more interesting graphical
+metaphor when used to compare the distributions of several related groups.
+In this context, dot plots are a better organized method of handling
+overlapping points than jittering. The following pair of plots
+illustrate this idea:
+<<geom-dotplot-ex3,fig.width=3,fig.height=3,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
+   geom_boxplot(aes(fill = factor(vs)), alpha = 0.3, outlier.color = NA) +
+   geom_point(position = position_jitter(width = 0.05))
+ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
+   geom_boxplot(aes(fill = factor(vs)), alpha = 0.3, outlier.color = NA) +
+   geom_dotplot(binaxis = "y", stackdir = "center", position = 'dodge')
+@
+Whenever a factor is used
+in a dot plot, the rule is that the dot plot for each level will be
+dodged; this is also the case if there are multiple factors at play.
+For example, if $A$ and $B$ are two factors such that
+the levels of $A$ in a plot comprise the horizontal axis, then dotplots
+of each level of $B$ are dodged within individual levels of $A$. The
+following plot shows two different ways of handling this
+situation. The left plot dodges the dot plots by number of cylinders
+within each level of \code{vs}, whereas the right plot uses
+\func{facet\_grid} as an alternative mode of display. In this
+particular example, the faceted plot makes it easier to see that there
+are no cars with eight cylinders when \code{vs = 1}. Also note that in
+the faceted plot, we used the labeller function \func{label\_both} to
+indicate both the factor name and its level in each panel strip.
+<<geom-dotplot-ex4,fig.width=3,fig.height=3,message=FALSE,cache=TRUE,out.width=0.45\textwidth,fig.show=hold>>=
+ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
+  geom_dotplot(binaxis = "y", stackdir = "center", position = "dodge")
+ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
+  geom_dotplot(binaxis = "y", stackdir = "center") +
+  xlab('Number of cylinders') +
+  facet_grid(. ~ vs, labeller = label_both)
+@
+
+\subsection{\func{geom\_violin}}
+
+This function generates violin plots in \pkg{ggplot2}, a way to plot
+one or more continuous density estimates that is particularly useful
+when comparing multiple groups. The graphical metaphor of a
+violin plot is a combination of a box plot and a kernel density
+estimate, the latter of which is rotated to run alongside the box plot
+symmetrically on each
+side. The examples below come from the function's help page.
+
+In \func{geom\_violin}, violins are automatically dodged when any
+aesthetic is a factor. By default, the maximum width is scaled to be
+proportional to the sample size. In the plot on the far right below,
+the bandwidth of the kernel density estimator is reduced from the
+default 1, which makes for a less smooth density estimate and hence a
+less smooth violin plot.
+<<geom-violin-ex1,fig.width=3,fig.height=3,message=FALSE,cache=TRUE,out.width=0.31\textwidth,fig.show=hold>>=
+p <- ggplot(mtcars, aes(factor(cyl), mpg))
+p + geom_violin()    # default scale is 'count'
+p + geom_violin(aes(fill = factor(cyl)))
+p + geom_violin(adjust = 0.5)
+@
+The next set of plots simply play around with a few extra features.
+The plot on the left adds a strip plot to the violin for each group.
+The central plot adds fill color and alpha transparency to the violins
+and is augmented with boxplots. The plot on the far right adds
+a dot plot around the center of each violin, which is useful in that
+the dot plot resembles the shape of the violin (as it should since
+each estimates the underlying true density in its own way).
+<<geom-violin-ex22,fig.width=3,fig.height=3,message=FALSE,cache=TRUE,out.width=0.31\textwidth,fig.show=hold>>=
+set.seed(110)
+dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
+ggplot(dat, aes(x=x, y=y)) + geom_violin() + geom_point(shape=21)
+ggplot(dat, aes(x = x, y = y)) +
+    geom_violin(aes(fill = x, colour = x), alpha = 0.3, width = 0.5) +
+    geom_boxplot(aes(fill = x), width = 0.2, outlier.colour = NA) +
+    guides(fill = guide_legend(override.aes = list(alpha = 1)))
+ggplot(dat, aes(x = x, y = y)) +
+    geom_violin() +
+    geom_dotplot(binaxis = 'y', stackdir = 'center')
+@
+
+\section{Improvements in \code{facet\_grid}}
+\label{sec:facetgrid}
+
+Several improvements have been made to \func{facet\_grid}, as noted in
+the NEWS file for this version of the package and in
+section~\ref{sec:vischg}. Below are some examples taken from the
+function's help page.
+
+The first plot illustrates a one-dimensional grid with free scales---the
+x scales vary and the panel widths are the same:
+<<facet-grid-example-1d,fig.width=4,fig.height=3,fig.align=center,message=FALSE,cache=TRUE>>=
+m <- ggplot(mtcars, aes(mpg, wt, colour = factor(cyl))) + geom_point()
+m + facet_grid(. ~ cyl, scales = 'free')
+@
+
+The next set of plots shows various ways of using the \code{scales = }
+and \code{space = } options to achieve different effects. The first
+plot illustrates a one-dimensional grid with free scales---the $x$
+scales vary and the panel widths are the same:
+
+Next, we show a set of plots with two-dimensional grids. The first is
+a basic 2D grid with free scales in both dimensions---in this case,
+each panel has separate $x$ and $y$ scales. The plot on the right
+shows that \code{margins = TRUE} is once again a viable option in
+\func{facet\_grid}.
+<<facet-grid-2d-example1,fig.width=4,fig.height=3.5,out.width=0.48\textwidth,fig.show=hold,message=FALSE,cache=TRUE>>=
+m + facet_grid(vs ~ am, scales = 'free')
+m + facet_grid(vs ~ am, margins = TRUE)
+@
+One of the new features, due to the efforts of Willem Hilgenberg, is
+to allow free scales in one direction only. The left plot below produces
+different $x$ scales in the columns while the plot on the right
+produces different $y$ scales:
+<<facet-grid-2d-example2,fig.width=4,fig.height=4,out.width=0.48\textwidth,fig.show=hold,message=FALSE,cache=TRUE>>=
+m + facet_grid(vs ~ am, scales = 'free_x')
+# Add labeller to distinguish level of vs
+# from those of am:
+m + facet_grid(vs ~ am, scales = 'free_y')
+@
+The following plots, which are not shown here, combine free scales
+with free space:
+<<facet-grid-freefree,echo=TRUE,eval=FALSE>>=
+m + facet_grid(vs ~ am, scales = 'free', space = 'free')
+m + facet_grid(vs ~ am, scales = 'free', space = 'free_x')
+m + facet_grid(vs ~ am, scales = 'free', space = 'free_y')
+@
+
+The way labels are rendered in \func{facet\_grid} has changed in
+version 0.9.0. One now uses the \func{label\_} functions from the
+\pkg{scales} package in conjunction with the \code{labeller = }
+argument. The following example comes from the \func{facet\_grid} help page.
+<<facet-grid-labels-ex1,fig.width=4,fig.height=3.5,out.width=0.48\textwidth,fig.show=hold,message=FALSE,cache=TRUE>>=
+mtcars$cyl2 <- factor(mtcars$cyl, labels = c('alpha', 'beta', 'sqrt(x, y)'))
+q <- qplot(mpg, wt, data = mtcars) + facet_grid(cyl ~ vs)
+q + facet_grid(. ~ vs, labeller = label_bquote(alpha^.(x)))
+q + facet_grid(. ~ cyl2, labeller = label_parsed)
+@
+
+
+
+
+
+\end{document}
