@@ -106,11 +106,11 @@ require('rgeos')
 \ \ \ \ 2.2: \texttt{guide\_colorbar()} &  7 \\[4pt]
 \textbf{\large{3: New geoms}}  & \textbf{\large{9}}  \\
 \ \ \ \ 3.1: \texttt{geom\_map()}  & 9 \\
-\ \ \ \ 3.2: \texttt{geom\_raster()}   & 12\\
+\ \ \ \ 3.2: \texttt{geom\_raster()}   & 12 \\
 \ \ \ \ 3.3: \texttt{geom\_dotplot()}  & 13 \\
 \ \ \ \ 3.4: \texttt{geom\_violin()}   & 18 \\[4pt]
 \textbf{\large{4: Improvements to \texttt{facet\_grid()}}}  & \textbf{\large{20}}  \\[4pt]
-\textbf{\large{5: scales package}}  & \textbf{\large{23}}  \\
+\textbf{\large{5: scales package}}  & \textbf{\large{22}}  \\
 \ \ \ \ 5.1: Functions to manage breaks, axis labels and strip labels &
 24 \\
 \ \ \ \ 5.2: Transformation functions  & 24 \\
@@ -126,7 +126,7 @@ require('rgeos')
 \end{center}
 
 \newpage
-\SweaveOpts{fig.align=center,cache=TRUE,message=FALSE,tidy=FALSE}
+\SweaveOpts{fig.align=center,cache=TRUE,message=FALSE,highlight=FALSE,tidy=FALSE}
 
 \section{Overview}
 \label{sec:intro}
@@ -352,11 +352,13 @@ can specify a call to \func{guides} with multiple legends, each of
 which may have its own call to \func{guide\_legend}.
 <<guide-legend-ex1,fig.width=4,fig.height=2.5>>=
 q <- ggplot(diamonds, aes(x = table, fill = clarity)) +
-       geom_histogram()
+      geom_histogram() + scale_y_continuous(labels = comma)
 # Create two rows of legend labels and increase the size of the
 # legend title font
-q + guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
-       title.theme = theme_text(size = 12, face = 'bold'))) +
+q + theme_bw() +
+    guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
+      title.theme = theme_text(size = 12, face = 'bold'))) +
+    scale_fill_grey(start = 0.1, end = 0.9) +
     xlim(45, 75)
 @
 
@@ -365,11 +367,13 @@ This is nearly the same plot as above, but now we use
 value is a \func{guide\_legend} function call. The \code{guide = } argument is
 specific to scale functions for aesthetics, just as \code{trans = } is
 specific to positional scale functions\footnote{See section~\ref{sec:axes}.}.
-<<guide-legend-ex2,fig.width=4.5,fig.height=2.5>>=
-q +  scale_fill_discrete(guide = guide_legend(nrow = 4,
-                title.position = 'right',
-                title.theme = theme_text(size = 12, face = 'bold'))) +
-     xlim(45, 75)
+<<guide-legend-ex2,fig.width=4,fig.height=2.5>>=
+q + theme_bw() +
+    scale_fill_discrete(guide = guide_legend(nrow = 4,
+         title.position = 'right',
+         title.theme = theme_text(size = 12, face = 'bold'))) +
+    scale_fill_grey(start = 0.1, end = 0.9) +
+    xlim(45, 75)
 @
 The following example concerns an application that comes up occasionally
 on the ggplot2 list: overriding the alpha transparency value in
@@ -380,7 +384,7 @@ very low alpha value makes it impossible to see the legend key items, but
 visible in the right hand plot.
 <<guide-legend-ex3,dev=png,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
 (p3 <- qplot(carat, price, data = diamonds, colour = color,
-             alpha = I(0.01)))
+             alpha = I(1/100)))
 p3 + guides(colour = guide_legend(override.aes = list(alpha = 1)))
 @
 
@@ -413,7 +417,7 @@ p1 + scale_fill_continuous(guide = guide_colorbar())
 p1 + guides(fill = guide_colorbar())
 @
 \noindent We illustrate the first and third methods below:
-<<guide-colorbar-ex2,fig.width=4.5,fig.height=3.5,out.width=0.45\textwidth,fig.show=hold>>=
+<<guide-colorbar-ex2,fig.width=4,fig.height=3.5,out.width=0.45\textwidth,fig.show=hold>>=
 p1 + scale_fill_continuous(guide = "colorbar")
 p1 + guides(fill = guide_colorbar(barwidth = 0.5, barheight = 10))
 @
@@ -429,16 +433,15 @@ the two plots above.
 above, respectively, are
 <<guide-colorbar-ex2a,eval=FALSE>>=
 p1 + guides(fill = "colorbar", size = "legend")
-p1 + scale_fill_continuous(guide = guide_colorbar(barwidth = 0.5,
-                           barheight = 10))
+p1 + scale_fill_continuous(guide = guide_colorbar(barwidth = 0.5, barheight = 10))
 @
 
 Colorbars can also be used with a continuous color aesthetic; here is
 an example from the built-in data frame \code{mpg}:
-<<guide-colorbar-ex3,fig.width=3,fig.height=2.1>>=
-ggplot(mtcars, aes(x = disp, y = mpg, colour = wt)) + geom_point() +
-   scale_colour_gradientn(colours = terrain.colors(10),
-                          guide = 'colorbar')
+<<guide-colorbar-ex3,fig.width=4,fig.height=2.5>>=
+ggplot(mtcars, aes(x = disp, y = mpg, colour = wt)) +
+   geom_point() +
+   scale_colour_gradient(low = 'blue', high = 'orange', guide = 'colorbar')
 @
 In this case, we wanted to use the \func{colour\_gradientn} scale
 function to determine the color range. The \code{guide = } argument in
@@ -516,8 +519,7 @@ names(elect.gen.tot) <- c("id", "y2004", "y2005", "y2006", "y2007", "y2008")
 ggplot(elect.gen.tot, aes(map_id = id)) +
     geom_map(aes(fill = log(y2007)), map = world.ggmap) +
     expand_limits(x = world.ggmap$long, y = world.ggmap$lat) +
-    scale_fill_gradient(low = 'orange', high = 'blue',
-                        guide = 'colorbar') +
+    scale_fill_gradient(low = 'orange', high = 'blue', guide = 'colorbar') +
     opts(panel.background = theme_rect(fill = 'skyblue'))
 @
 \noindent There are some holes in the map due to missing data
@@ -622,6 +624,7 @@ the `histodot' method is that outliers are positioned where
 they should be rather than assigned to a midpoint value defined by
 fixed binning (Wilkinson, 1999).
 
+\newpage
 Dots can be manipulated in certain ways:
 \begin{enumerate}[(i)]
   \item The size of a dot can vary depending on the sample size and
@@ -686,6 +689,7 @@ ggplot(mtcars, aes(x = 1, y = mpg)) +
   geom_dotplot(binaxis = 'y', stackdir = 'center')
 @
 
+\newpage
 \noindent Here are a few examples using the \code{dotsize} and
 \code{stackratio} arguments:
 <<geom-dotplot-dotsize-stackratio,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
@@ -716,15 +720,19 @@ overlapping points than jittering. The following pair of plots
 illustrate this idea:
 <<geom-dotplot-ex3,fig.width=3,fig.height=3,out.width=0.45\textwidth,fig.show=hold>>=
 ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
-   geom_boxplot(aes(fill = factor(vs)), alpha = 0.3, outlier.color = NA) +
+   theme_bw() +
+   geom_boxplot(aes(fill = factor(vs)), outlier.color = NA) +
    geom_point(position = position_jitter(width = 0.05),
-              colour = 'blue', fill = 'blue') +
-   labs(x = 'vs', y = 'mpg', fill = 'vs')
+              colour = "blue", fill = "blue") +
+   labs(x = "vs", y = "mpg", fill = "vs") +
+   scale_fill_grey(start = 0.6, end = 0.8)
 ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
-   geom_boxplot(aes(fill = factor(vs)), alpha = 0.3, outlier.color = NA) +
+   theme_bw() +
+   geom_boxplot(aes(fill = factor(vs)), outlier.color = NA) +
    geom_dotplot(binaxis = "y", stackdir = "center",
-                position = 'dodge', colour = 'blue', fill = 'blue') +
-   labs(x = 'vs', y = 'mpg', fill = 'vs')
+      position = "dodge", colour = "blue", fill = "blue") +
+   labs(x = "vs", y = "mpg", fill = "vs") +
+   scale_fill_grey(start = 0.6, end = 0.8)
 @
 Whenever a factor is used as an aesthetic
 in a dot plot, the rule is that the dot plot for each level will be
@@ -742,15 +750,18 @@ the faceted plot, the labeller function \func{label\_both} is used to
 indicate both the factor name and its level in each panel strip.
 <<geom-dotplot-ex4,fig.width=3,fig.height=3,out.width=0.48\textwidth,fig.show=hold>>=
 ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
-  geom_dotplot(binaxis = "y", stackdir = "center",
-               position = "dodge") +
-  labs(x = 'vs', y = 'mpg', fill = 'cyl') +
-  opts(legend.position = 'top')
+   theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center",
+                             position = "dodge") +
+   labs(x = "vs", y = "mpg", fill = "cyl") +
+   scale_fill_grey(start = 0.2, end = 0.9) +
+   opts(legend.position = "top")
 ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
-  geom_dotplot(binaxis = "y", stackdir = "center") +
-  labs(x = 'No. cylinders', y = 'mpg', fill = 'cyl') +
-  facet_grid(. ~ vs, labeller = label_both) +
-  opts(legend.position = 'top')
+   theme_bw() +
+   geom_dotplot(binaxis = "y", stackdir = "center") +
+   labs(x = "No. cylinders", y = "mpg", fill = "cyl") +
+   facet_grid(. ~ vs, labeller = label_both) +
+   scale_fill_grey(start = 0.2, end = 0.9) +
+   opts(legend.position = "top")
 @
 
 \subsection{\func{geom\_violin}}
@@ -768,10 +779,12 @@ proportional to the sample size. In the plot on the far right below,
 the bandwidth of the kernel density estimator is reduced from the
 default 1, which makes for a less smooth density estimate and hence a
 less smooth violin plot.
-<<geom-violin-ex1,fig.width=3,fig.height=2.5,out.width=0.31\textwidth,fig.show=hold>>=
+<<geom-violin-ex1,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
 p <- ggplot(mtcars, aes(factor(cyl), mpg))
 p + geom_violin()    # default scale is 'count'
-p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl)))
+p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl))) +
+    scale_fill_grey(start = 0.2, end = 0.8) +
+    scale_colour_grey(start = 0.2, end = 0.8)
 p + geom_violin(adjust = 0.5)
 @
 The next set of plots simply play around with a few extra features.
@@ -786,18 +799,18 @@ set.seed(110)
 dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
 ggplot(dat, aes(x=x, y=y)) + geom_violin() + geom_point(shape=21) +
     xlab('cyl')
-ggplot(dat, aes(x = x, y = y)) +
+ggplot(dat, aes(x = x, y = y)) + theme_bw() +
     geom_violin(aes(fill = x, colour = x), alpha = 0.3, width = 0.5) +
     geom_boxplot(aes(fill = x), width = 0.2, outlier.colour = NA) +
     labs(x = 'cyl', fill = 'cyl', colour = 'cyl') +
+    scale_fill_grey(start = 0.4, end = 0.8) +
+    scale_colour_grey(start = 0.4, end = 0.8) +
     guides(fill = guide_legend(override.aes = list(alpha = 1)))
 ggplot(dat, aes(x = x, y = y)) +
     geom_violin() +
     geom_dotplot(binaxis = 'y', stackdir = 'center') +
     xlab('cyl')
 @
-
-\newpage
 
 \section{Improvements in \func{facet\_grid}}
 \label{sec:facetgrid}
@@ -810,8 +823,11 @@ function's help page.
 The first plot illustrates a one-dimensional grid with free scales---the
 x scales vary and the panel widths are the same:
 <<facet-grid-example-1d,fig.width=5,fig.height=3>>=
-m <- ggplot(mtcars, aes(mpg, wt, colour = factor(cyl))) + geom_point()
-m + facet_grid(. ~ cyl, scales = 'free') + labs(colour = 'cyl')
+m <- ggplot(mtcars, aes(mpg, wt, colour = factor(cyl))) +
+       theme_bw() +  geom_point() + labs(colour = 'cyl') +
+       scale_colour_manual(breaks = levels(factor(mtcars$cyl)),
+            values = c('blue', 'deeppink', 'orange'))
+m + facet_grid(. ~ cyl, scales = 'free')
 @
 
 Next, we show a set of plots with two-dimensional grids. The first is
@@ -820,26 +836,22 @@ each panel has separate $x$ and $y$ scales. The plot on the right
 shows that \code{margins = TRUE} is once again a viable option in
 \func{facet\_grid}.
 <<facet-grid-2d-example1,fig.width=4,fig.height=3.5,out.width=0.48\textwidth,fig.show=hold>>=
-m + facet_grid(vs ~ am, scales = 'free') + labs(colour = 'cyl') +
+m + facet_grid(vs ~ am, scales = 'free') +
     opts(legend.position = 'top')
-m + facet_grid(vs ~ am, margins = TRUE) + labs(colour = 'cyl') +
+m + facet_grid(vs ~ am, margins = TRUE) +
     opts(legend.position = 'top')
 @
 One of the new features, due to the efforts of Willem Hilgenberg, is
 to allow free scales in one direction only. The left plot below produces
 different $x$ scales in the columns while the plot on the right
 produces different $y$ scales:
-<<facet-grid-2d-example2,fig.width=4,fig.height=4,out.width=0.48\textwidth,fig.show=hold>>=
-m + facet_grid(vs ~ am, scales = 'free_x') + labs(colour = 'cyl') +
+<<facet-grid-2d-example2,fig.width=4,fig.height=3.5,out.width=0.48\textwidth,fig.show=hold>>=
+m + facet_grid(vs ~ am, scales = 'free_x') +
     opts(legend.position = 'top')
-# Add labeller to distinguish levels of vs
-# from those of am:
+# Add labeller to distinguish levels of vs from those of am:
 m + facet_grid(vs ~ am, scales = "free_y", labeller = label_both) +
-    labs(colour = "cyl") +
     opts(legend.position = "top")
 @
-
-\newpage
 
 \noindent The following plots, which are not shown here, combine free
 scales with free space:
@@ -867,7 +879,7 @@ expression as its input argument. In previous versions of
 \code{labeller = } argument. In \func{label\_parsed}, one passes a
 vector of strings that are parsed into expressions and evaluated.
 
-\newpage
+%\newpage
 
 \section{\pkg{scales} package}
 \label{sec:scalespkg}
@@ -881,6 +893,7 @@ but have been rewritten so that they can be used in base graphics or
 in the examples of the \func{cscale} and \func{dscale} functions in
 \pkg{scales}.}.
 
+\newpage
 \noindent The functions in the \pkg{scales} package fall broadly into
 the following categories:
 \begin{description}
@@ -927,7 +940,7 @@ of arguments call the function returned by the original function.
 The purpose of converting to functions and repackaging them
 is to provide a user with more tools to
 manage axis ticks, axis labels and certain elements of legends.
-Except for the \func{\_pal} functions, these will normally be used
+Except for the \func{\_pal} function, these will normally be used
 inside a \func{scale\_*} function call; several examples are given in
 section~\ref{sec:axes}.
 
@@ -985,6 +998,8 @@ third argument is its inverse function. The ellipses are placeholders
 for the function definitions. Two examples are illustrated
 below: the arcsine transformation and the slightly more complicated
 logarithmic transformation:
+
+\newpage
 <<arcsine>>=
 asn_trans
 log_trans
@@ -1015,6 +1030,7 @@ functions that incorporate these palettes. More often, one would use
 them in conjunction with the \func{cscale} and \func{dscale} functions
 in the \pkg{scales} package using base or Lattice graphics.
 
+\newpage
 \section{Scaling x- and y-axes}
 \label{sec:axes}
 
