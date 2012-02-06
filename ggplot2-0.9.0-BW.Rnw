@@ -132,7 +132,7 @@ require('rgeos')
 \label{sec:intro}
 
 Version 0.9.0 of the \pkg{ggplot2} package contains a number of
-changes that are designed to provide a user with more
+changes that provide a user with more
 flexibility and greater ease of use in the construction of a
 \code{ggplot}. The two most evident improvements from a user's
 perspective are: (i) the help
@@ -940,7 +940,7 @@ of arguments call the function returned by the original function.
 The purpose of converting to functions and repackaging them
 is to provide a user with more tools to
 manage axis ticks, axis labels and certain elements of legends.
-Except for the \func{\_pal} function, these will normally be used
+Except for the \func{*\_pal} functions, these will normally be used
 inside a \func{scale\_*} function call; several examples are given in
 section~\ref{sec:axes}.
 
@@ -1293,7 +1293,7 @@ log-transformed. Mathematically, the fitted linear model in the first
 graph has the form $\widehat{\log y} = b_0 + b_1 \log x$, whereas the
 fitted model in the second graph is $\log \hat{y} = \log(b_0 + b_1
 x)$, which happens to be a transform-both-sides model (Carroll and
-Ruppert, 1987) since the same coordinate transformation was applied to
+Ruppert, 1988) since the same coordinate transformation was applied to
 both sides of the fitted model.
 
 Separate transformations for $x$ and $y$ are also possible:
@@ -1317,6 +1317,14 @@ number of incremental improvements have been made both in design and
 execution; many of these were described in section~\ref{sec:intro},
 but a more complete list is found in the NEWS file of the package.
 
+Thanks to members of the \code{ggplot2-dev} list for comments on an
+earlier draft of this document. The document was processed using the
+\pkg{knitr} package, developed by Yihui Xie
+\url{http://yihui.github.com/knitr/}. Special thanks go to Yihui for
+patiently answering many elementary questions about the package.
+
+The source code for the color and B/W printer friendly versions is
+located at \url{https://github.com/djmurphy420/ggplot2-transition-guide}.
 We hope that this guide is helpful as you move from 0.8.9 to 0.9.0 and
 that the changes and new facilities of the package aid you in making
 even better ggplots.
@@ -1341,7 +1349,9 @@ Bellcore.
 \noindent Wilkinson, L. (2005). \emph{The Grammar of Graphics}, 2nd
 ed. New York: Springer.
 
-
+\noindent Xie, Y. (2012). \emph{knitr: A General-Purpose Tool for
+  Dynamic Report Generation in R.}
+\url{http://yihui.github.com/knitr/demo/manual/}.
 
 
 
