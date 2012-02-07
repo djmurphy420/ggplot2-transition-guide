@@ -61,6 +61,14 @@ dev:        plotting device. knitr supports about 20 graphics devices; I've used
 
 See the existing examples in the document for guidance. 
 
+This release contains toggles for color or B/W friendly versions. In the first code chunk 
+after \begin{document}, there is a line
+bw_version <- FALSE
+
+Similarly, in the \SweaveOpts{} line, there is an element  highlight=TRUE. For B/w, reverse 
+the logicals on each, save the .Rnw file and process it through R with knit() as above to get 
+a .tex file with the same root which can then be run (twice) through pdflatex.
+
 I haven't done anything fancy - this is my first attempt with knitr, so I've kept it as
 basic as possible.
 

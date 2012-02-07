@@ -1,4 +1,10 @@
 \documentclass[11pt]{article}
+%\usepackage{fontspec,xltxtra,xunicode}
+%\setromanfont{Georgia}
+%\setsansfont{Tahoma}
+%\setmonofont[Scale=MatchLowercase,Mapping=tex-ansi]{Inconsolata-dz}
+\usepackage[charter]{mathdesign}
+\renewcommand{\sfdefault}{phv}
 \setlength{\parskip}{0.5ex plus0.1ex minus0.1ex}
 \setcounter{secnumdepth}{2}
 %\setlength{\parindent}{0em}
@@ -7,8 +13,11 @@
 \usepackage[reqno]{amsmath}
 \usepackage{amsopn,amsbsy,amstext,amsthm,lineno}
 \usepackage{enumerate,calc}
+\usepackage{multirow}
 %\usepackage[small]{caption2}
 %\usepackage[round,longnamesfirst]{natbib}
+\usepackage[toc]{multitoc}
+\renewcommand*{\multicolumntoc}{2}
 \usepackage{url}
 \usepackage[authoryear]{natbib}
 \usepackage[unicode=true,pdfusetitle,
@@ -20,13 +29,10 @@
 \usepackage{geometry}
 \geometry{body={6in,8.5in},top=1in,left=1.25in}
 \usepackage{titlesec}
-\newcommand\secformat[1]{%
-  \parbox[b]{.5\textwidth}{\filleft\bfseries #1}%
-  \quad\rule[-12pt]{2pt}{40pt}\quad
-  {\fontsize{60}{60}\selectfont\thesection}}
-\titleformat{\section}[block]
-  {\filleft\normalfont\sffamily\LARGE}{}{0pt}{\secformat}
-\titlespacing*{\section}{0pt}{*3}{*2}[1pc]
+\titleformat{\section}
+  {\normalfont\sffamily\LARGE}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\sffamily\large}{\thesubsection}{1em}{}
 % Commands to control position of graphics output
 \doublehyphendemerits=100000
 \brokenpenalty=10000
@@ -70,8 +76,9 @@
 \begin{document}
 <<setup,echo=FALSE,results=hide,cache=FALSE,message=FALSE>>=
 options(width = 90, replace.assign = TRUE)
+bw_version <- FALSE
 knit_hooks$set(fig = function(before, options, envir){
-    if(before && options$fig.show != 'none')
+    if(before && options$fig.show != "none")
         par(mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, cex.axis = 0.9,
             mgp = c(2, 0.7, 0), tcl = -0.3)
       } )
@@ -92,41 +99,11 @@ require('rgeos')
 \maketitle
 %% ------------------------------------------------------------------
 %% ------------------------------------------------------------------
-
+{\sffamily\tableofcontents}
 \thispagestyle{empty}
-\begin{center}
-{\fontencoding{OT1}\fontfamily{pzc}\selectfont
-\begin{tabular}{lr}
-\multicolumn{2}{r}{\huge{Contents}}  \\[6pt]
-\textbf{\large{1: Overview}}  &  \textbf{\large{2}}   \\
-\ \ \ \ 1.1: Visible changes  &  2  \\
-\ \ \ \ 1.2: Not so visible changes &  4 \\[4pt]
-\textbf{\large{2: Legend and colorbar guides}}  &  \textbf{\large{5}}   \\
-\ \ \ \ 2.1: \texttt{guide\_legend()}  &  5  \\
-\ \ \ \ 2.2: \texttt{guide\_colorbar()} &  7 \\[4pt]
-\textbf{\large{3: New geoms}}  & \textbf{\large{9}}  \\
-\ \ \ \ 3.1: \texttt{geom\_map()}  & 9 \\
-\ \ \ \ 3.2: \texttt{geom\_raster()}   & 12\\
-\ \ \ \ 3.3: \texttt{geom\_dotplot()}  & 13 \\
-\ \ \ \ 3.4: \texttt{geom\_violin()}   & 18 \\[4pt]
-\textbf{\large{4: Improvements to \texttt{facet\_grid()}}}  & \textbf{\large{20}}  \\[4pt]
-\textbf{\large{5: scales package}}  & \textbf{\large{23}}  \\
-\ \ \ \ 5.1: Functions to manage breaks, axis labels and strip labels &
-24 \\
-\ \ \ \ 5.2: Transformation functions  & 24 \\
-\ \ \ \ 5.3: Palette functions  & 25  \\[4pt]
-\textbf{\large{6: Scaling x- and y- axes}}  & \textbf{\large{26}}  \\
-\ \ \ \ 6.1: Dates and datetimes  & 26 \\
-\ \ \ \ 6.2: Continuous variables  & 28 \\
-\ \ \ \ 6.3: Scale and coordinate transformations & 31 \\[4pt]
-\textbf{\large{7: Summary}}  & \textbf{\large{34}}  \\[4pt]
-\textbf{\large{8: References}}  & \textbf{\large{34}}
-\end{tabular}
-  }
-\end{center}
 
-\newpage
-\SweaveOpts{fig.align=center,cache=TRUE,message=FALSE,tidy=FALSE}
+%\newpage
+\SweaveOpts{fig.align=center,highlight=TRUE,cache=TRUE,message=FALSE,tidy=FALSE}
 
 \section{Overview}
 \label{sec:intro}
@@ -198,8 +175,8 @@ axes, text annotation and legends.
     its value while the attribute scale functions (\eg,
     \func{scale\_fill\_discrete} or \func{scale\_colour\_manual}) have
     a new argument \code{guide = }, which can assume one of the values
-    \code{'none'} or \code{'legend'}; for continuous fill and color
-    scales, another option is \code{'colorbar'}. Examples of these are
+    \code{"none"} or \code{"legend"}; for continuous fill and color
+    scales, another option is \code{"colorbar"}. Examples of these are
     present in the help files;
     others will be shown in section~\ref{sec:axes}. This is a
     significant change in the package that may affect existing user code.
@@ -229,17 +206,17 @@ axes, text annotation and legends.
     problem when a faceting variable was the name of an aesthetic (\eg
     colour or size). You can now expect that code like the following
     will work:
-    \begin{verbatim}
+    <<code0,eval=FALSE>>=
     ggplot(df, aes(x, y, group = group, colour = color))
-    \end{verbatim}
+    @
   \item The problem with axis titles being too close to axis labels at
     the default font size has been fixed in 0.9.0. In addition, axis
     titles are now centered with respect to the panels rather than the
     overall graphics region.
   \item An expanded collection of possible linetypes is introduced in
     this version. See the help page of \func{aes\_linetype\_size\_shape}
-    for some examples, and the help page of \func{scale\_linetype} for
-    a brief description.
+    for some examples, and for a brief description, the help
+    page of \func{scale\_linetype}.
   \item The \func{facet\_grid} function has a couple of new
     features. The \code{scales = } argument now supports values \code{free\_x}
     and \code{free\_y}, which allow a user to adjust the spatial
@@ -304,7 +281,7 @@ co-developers. Some of the changes in progress include the following:
 \label{sec:guides}
 
 Control over legends is greatly expanded in version 0.9.0, largely due
-to the efforts of Kohske Takahashi. The two functions that will be
+to the efforts of Kohske Takahashi. The two functions
 discussed in this section are \func{guide\_legend} and
 \func{guide\_colorbar}. We discuss these first because they will be
 used extensively in the sections to follow.
@@ -322,54 +299,120 @@ can still use the \code{scale\_*()} functions as before (\eg
 functions provide a user with more control over aspects of the
 legend display. Both functions have numerous examples in their
 respective help pages that illustrate each argument at least once.
-We will show a few that may occur commonly in practice.
+We will show a few that may occur commonly in practice in the
+following two subsections. Bear in mind that legend guides are
+meant to be associated with discrete-valued aesthetics while colorbar
+guides are meant to correspond to continuous-valued aesthetics.
+
+Each guide function has a number of arguments. The following table lists
+those that are common to both legend guides and colorbar guides:
+\begin{center}
+  \begin{tabular}{|l|l|l|}    \hline
+ \textbf{Category}  &  \textbf{Argument}  & \textbf{Notes}    \\ \hline
+\multirow{5}{1cm}{title}
+   & \code{title}   & legend title   \\
+   & \code{title.position} & \code{"left"}, \code{"right"},
+   \code{"top"}, \code{"bottom"}  \\
+   & \code{title.theme}  & uses \func{theme\_text}   \\
+   & \code{title.hjust}  & horizontal justification  \\
+   & \code{title.vjust}  & vertical justification  \\ \hline
+\multirow{5}{1cm}{label}
+   & \code{label}   & TRUE $\longrightarrow$ labels drawn  \\
+   & \code{label.position} & \code{"left"}, \code{"right"},
+   \code{"top"}, \code{"bottom"}  \\
+   & \code{label.theme} & uses \func{theme\_text}   \\
+   & \code{label.hjust}  & horizontal justification  \\
+   & \code{label.vjust}  & vertical justification  \\ \hline
+\multirow{2}{1cm}{key options}
+   & \code{default.unit} & measurement unit    \\
+   & \code{direction}   & \code{"horizontal"} or \code{"vertical"} \\ \hline
+  \end{tabular}
+\end{center}
+\noindent The titles and labels of guides can be manipulated in
+similar ways since both have the same set of arguments. The
+\code{title/label.theme} argument allows one to adjust the properties of titles
+and/or labels that are covered by the \func{theme\_text} function.
 
 \subsection{\func{guide\_legend}}
 \label{sec:legend}
 
 This function provides a user with several options to control
-features of a legend, including titles, labels,
+features of a legend guide, including titles, labels,
 the height and width of legend keys, the direction of the legend and several
 other options that are useful when a large number of
-categories exist. There are several ways in which this
-function can be applied, so let's consider some examples to illustrate
-its usage. We will see that \func{guide\_legend} is not used as a
+categories exist. We will see that \func{guide\_legend} is not used as a
 primary function, but rather as the `value' of an argument inside
 another function, much like the various functions from the
 \pkg{scales} package to be discussed in section~\ref{sec:scalespkg}.
 
-One way in which \func{guide\_legend} is called is in conjunction with
+\noindent The arguments that are unique to \func{guide\_legend} are:
+\begin{center}
+  \begin{tabular}{ll}   \hline
+ \code{keywidth}  & width of legend key item  \\
+ \code{keylength} & length of legend key item \\
+ \code{override.aes} & (values of) aesthetics to be reset \\
+ \code{nrow}  & number of rows in the legend  \\
+ \code{ncol}  & number of columns in the legend  \\
+ \code{byrow} & TRUE $\longrightarrow$ order key items by row  \\
+ \code{bycol} & TRUE $\longrightarrow$ order key items by column \\ \hline
+ \end{tabular}
+\end{center}
+In a legend guide, one can manipulate the size of individual legend
+keys and specify the way they are arranged in a legend through the set
+of arguments above.
+
+There are several ways to call \func{guide\_legend}
+One way to invoke it is in conjunction with
 the new \func{guides} function. In the following example using the
 \code{diamonds} data, the factor clarity is the fill aesthetic for
 which a legend is to be built. The call to \func{guide\_legend} is
 the value of the \code{fill = } argument of \func{guides}. This
-syntax allows you to tailor one or multiple legends in one call. Think
-of \func{guides} as being analogous to the function \func{labs}, where
-each argument of \func{guides} is an aesthetic for which a legend
-is to be specified and \func{guide\_legend} provides the arguments to
-be changed from the default settings within an individual legend. One
-can specify a call to \func{guides} with multiple legends, each of
-which may have its own call to \func{guide\_legend}.
-<<guide-legend-ex1,fig.width=4,fig.height=2.5>>=
+syntax allows you to adjust one or multiple legends in a single call. Think
+of \func{guides} as analogous to the function \func{labs}; we will
+elaborate on this analogy a bit more in the next section.
+
+The code below creates four rows of legend keys, increases the
+font size of the legend title and emboldens it:
+<<guide-legend-ex1>>=
+# Base plot
 q <- ggplot(diamonds, aes(x = table, fill = clarity)) +
-       geom_histogram()
-# Create two rows of legend labels and increase the size of the
-# legend title font
-q + guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
-       title.theme = theme_text(size = 12, face = 'bold'))) +
+       geom_histogram() +
+       scale_y_continuous(labels = comma_format(digits = 5))
+# Create two columns of legend labels and increase the
+# size of the legend title font
+<<gl1-bw,eval=bw_version,echo=bw_version,fig.width=4,fig.height=2.5>>=
+q + theme_bw() +
+    guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
+       title.theme = theme_text(size = 12, face = "bold"))) +
+    scale_fill_grey(start = 0.1, end = 0.9) +
     xlim(45, 75)
 @
-
-This is nearly the same plot as above, but now we use
-\func{scale\_fill\_discrete} with a \code{guide = } argument, whose
-value is a \func{guide\_legend} function call. The \code{guide = } argument is
+<<gl1-col,eval=!bw_version,echo=!bw_version,fig.width=4,fig.height=2.5>>=
+q + guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
+       title.theme = theme_text(size = 12, face = "bold"))) +
+    xlim(45, 75)
+@
+@
+The same graph can be made by replacing the \func{guides} call with
+one to \func{scale\_fill\_discrete}, where the new \code{guide = }
+argument is used to make the legend using a \func{guide\_legend}
+function call as its value. The \code{guide = } argument is
 specific to scale functions for aesthetics, just as \code{trans = } is
 specific to positional scale functions\footnote{See section~\ref{sec:axes}.}.
-<<guide-legend-ex2,fig.width=4.5,fig.height=2.5>>=
-q +  scale_fill_discrete(guide = guide_legend(nrow = 4,
-                title.position = 'right',
-                title.theme = theme_text(size = 12, face = 'bold'))) +
-     xlim(45, 75)
+<<guide-legend-ex2>>=
+<<gl2-bw,eval=bw_version,echo=bw_version,fig.width=4.5,fig.height=2.5>>=
+q + theme_bw() + scale_fill_discrete(
+          guide = guide_legend(nrow = 4, title.hjust = 0.4,
+          title.theme = theme_text(size = 12, face = "bold"))) +
+    scale_fill_grey(start = 0.1, end = 0.9) +
+    xlim(45, 75)
+@
+<<gl2-col,eval=!bw_version,echo=!bw_version,fig.width=4.5,fig.height=2.5>>=
+q + scale_fill_discrete(guide = guide_legend(nrow = 4,
+       title.hjust = 0.4,
+       title.theme = theme_text(size = 12, face = "bold"))) +
+    xlim(45, 75)
+@
 @
 The following example concerns an application that comes up occasionally
 on the ggplot2 list: overriding the alpha transparency value in
@@ -380,7 +423,8 @@ very low alpha value makes it impossible to see the legend key items, but
 visible in the right hand plot.
 <<guide-legend-ex3,dev=png,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
 (p3 <- qplot(carat, price, data = diamonds, colour = color,
-             alpha = I(0.01)))
+             alpha = I(0.01)) +
+         scale_y_continuous(labels = dollar))
 p3 + guides(colour = guide_legend(override.aes = list(alpha = 1)))
 @
 
@@ -392,9 +436,31 @@ The new function \func{guide\_colorbar} is designed for continuous ranges
 of (fill) colors---as its name implies, it outputs a rectangle over
 which the color gradient varies, while providing more flexibility to
 the user in terms of the labeling and positioning of guide
-elements. At this time, it is applicable to \func{scale\_fill\_continuous} and
-\func{scale\_colour\_continuous} only; in particular, it does not work
-with the size aesthetic. The examples on the
+elements. At this time, it is applicable only to the
+\func{scale\_fill\_continuous} and \func{scale\_colour\_continuous}
+functions; in particular, it does not work with size.
+
+\noindent The following table lists the set of arguments unique to
+\func{guide\_colorbar}:
+\begin{center}
+  \begin{tabular}{ll}   \hline
+ \code{barwidth}  & width of the colorbar  \\
+ \code{barheight} & height of the colorbar  \\
+ \code{nbin}      & number of bins to use in the colorbar  \\
+ \code{raster}    & draw colorbar as a raster image? (Default: TRUE) \\
+ \code{ticks}     & should tick marks be drawn? (Default: TRUE)  \\
+ \code{draw.llim} & should lower limit tick marks be visible?
+ (Default: FALSE)  \\
+ \code{draw.ulim} & should upper limit tick marks be visible?
+ (Default: FALSE)   \\ \hline
+ \end{tabular}
+\end{center}
+Whereas legend guides could tinker with the length and height of
+individual legend keys, a colorbar guide can control the width and
+height of a colorbar, as well as the number of ticks and whether or
+not the upper and lower limits of a colorbar should be drawn.
+
+The examples on the
 \func{guide\_colorbar} help page show how the
 function works with \func{geom\_tile}, so an immediate application of
 this function is to heatmaps. Here is a simple example from the help page:
@@ -412,14 +478,15 @@ p1 + scale_fill_continuous(guide = "colorbar")
 p1 + scale_fill_continuous(guide = guide_colorbar())
 p1 + guides(fill = guide_colorbar())
 @
-\noindent We illustrate the first and third methods below:
+\noindent The following figure illustrates the first and third
+methods, respectively:
 <<guide-colorbar-ex2,fig.width=4.5,fig.height=3.5,out.width=0.45\textwidth,fig.show=hold>>=
 p1 + scale_fill_continuous(guide = "colorbar")
 p1 + guides(fill = guide_colorbar(barwidth = 0.5, barheight = 10))
 @
 The examples above indicate that if the fill and size aesthetics are
 both associated with the same variable and both produce a legend, the
-legends can be merged into one. We saw this with the plot of \code{p1}
+legends can be merged into one, ae we saw with the plot of \code{p1}
 at the top of this subsection. However, if one aesthetic uses a legend
 guide and another uses a colorbar guide, the two cannot be merged,
 even if both aesthetics correspond to the same variable. This is seen in
@@ -433,20 +500,54 @@ p1 + scale_fill_continuous(guide = guide_colorbar(barwidth = 0.5,
                            barheight = 10))
 @
 
+Let's return to the analogy between the \func{labs} function and the
+\func{guides} function.
+Recall that one can use \func{xlab} and \func{ylab} individually in a
+\func{ggplot} call; moreover, one can redefine legend titles with
+the \code{name} argument in the appropriate \func{scale\_aesthetic\_*}
+function. The \func{labs} function allows one to define titles for any
+positional axis or legend in one call, where the aesthetic is the
+argument name and the title is its value; \eg
+<<labex,echo=TRUE,eval=FALSE>>=
+labs(x = "My x-axis", y = "My y-axis", colour = "Category")
+@
+The \func{guides} function is analogous to \func{labs} in the sense
+that one can define a legend or colorbar guide for each aesthetic that
+generates a guide. The call can be as
+simple as defining the type of guide for each aesthetic, as in
+<<labex2,echo=TRUE,eval=FALSE>>=
+p1 + guides(fill = "colorbar", size = "legend")
+@
+\noindent or it can be a more complete specification for each guide, \eg
+<<labex3,echo=TRUE,eval=FALSE>>=
+p1 + guides(fill = guide_colorbar(nbin = 6, ticks = FALSE),
+            colour = guide_legend(label.position = "left"))
+@
+As in \func{labs}, the aesthetic is the argument and the
+\func{guide\_*} function is its value. Alternatively, one can use a
+scale function with a \code{guide = } argument just as one can use a
+scale function and specify a legend title with the \code{name = }
+argument. The difference is that the value of the \code{guide = }
+argument can be a text string that specifies the guide (assuming its
+default arguments) or it can be a call to one of \func{guide\_legend}
+or \func{guide\_colorbar} wherein one or more default arguments can be
+modified.
+
 Colorbars can also be used with a continuous color aesthetic; here is
 an example from the built-in data frame \code{mpg}:
 <<guide-colorbar-ex3,fig.width=3,fig.height=2.1>>=
-ggplot(mtcars, aes(x = disp, y = mpg, colour = wt)) + geom_point() +
-   scale_colour_gradientn(colours = terrain.colors(10),
-                          guide = 'colorbar')
+ggplot(mtcars, aes(x = disp, y = mpg, colour = wt)) +
+    geom_point() +
+    scale_colour_gradient(low = "blue", high = "orange",
+                           guide = "colorbar")
 @
 In this case, we wanted to use the \func{colour\_gradientn} scale
 function to determine the color range. The \code{guide = } argument in
 any of the \code{scale\_colour\_*()} functions allows one to specify a
-colorbar in place of a legend. If no legend or colorbar was desired,
-you could substitute \code{guide = 'none'} instead.
+colorbar in place of a legend. If no legend or colorbar is desired,
+you can substitute \code{guide = "none"} instead.
 
-
+\newpage
 \section{New geoms}
 \label{sec:geoms}
 
@@ -467,7 +568,7 @@ ggplot(crimes, aes(map_id = state)) +
     geom_map(aes(fill = Murder), map = states_map) +
     expand_limits(x = states_map$long, y = states_map$lat) +
     guides(fill = guide_colorbar(colours = topo.colors(10))) +
-    opts(legend.position = 'top')
+    opts(legend.position = "top")
 @
 \noindent In this choropleth map, the initial \func{ggplot} call
 invokes the data
@@ -479,14 +580,16 @@ the object \code{states\_map}.
 The next example is one that imports a map file from one
 source and a data file from another. The following is an adaptation of
 an example posted by Tom Hopper on the ggplot2 list in 2010, whose
-solution was posted here with respect to version 0.8.9:
-\url{http://groups.google.com/group/ggplot2/msg/de3c60c1833ea4a6}. The
+solution was posted
+\href{http://groups.google.com/group/ggplot2/msg/de3c60c1833ea4a6}{here}
+with respect to version 0.8.9. The
 code takes some time to run, so I wouldn't suggest running it yourself
 unless you are really, really curious, but links to the data and code are given
-below in case you want to try it. The world map borders can be
-found at \url{http://dl.dropbox.com/u/57587928/TM_WORLD_BORDERS-0.3.zip} and
-a sanitized file of electricity generation data by country is found at
-\url{http://dl.dropbox.com/u/57587928/Total_Electricity_Net_Generation.csv}
+below in case you want to try it. Click here for the
+\href{http://dl.dropbox.com/u/57587928/TM_WORLD_BORDERS-0.3.zip}{world map
+borders}
+data and here for a sanitized file of
+\href{http://dl.dropbox.com/u/57587928/Total_Electricity_Net_Generation.csv}{electricity generation data}.
 The zip file should be unpacked first in a directory and it's probably
 a good idea to keep the csv file in the same directory. The
 \pkg{rgdal} package needs to be loaded to run \func{readOGR}; the first
@@ -495,14 +598,14 @@ world borders file.
 <<geom-map-elecmap,eval=FALSE>>=
 # replace this with the directory that holds the world borders
 # shapefiles and the electricity generation data
-# setwd('/path/to/shapefiles')
+# setwd("/path/to/shapefiles")
 world.map <- readOGR(layer="TM_WORLD_BORDERS-0.3")
 ## a good idea if you want to reuse the map data
 # save(world.map, file = "worldmap.Rdata")
 ### Aside: to read it back in later,
-## library('maptools')
+## library("maptools")
 ## gpclibPermit()
-## load('worldmap.Rdata')
+## load("worldmap.Rdata")
 gpclibPermit()
 # Convert map data to data frame using fortify() for spatial objects
 world.ggmap <- fortify(world.map, region = "NAME")
@@ -516,9 +619,9 @@ names(elect.gen.tot) <- c("id", "y2004", "y2005", "y2006", "y2007", "y2008")
 ggplot(elect.gen.tot, aes(map_id = id)) +
     geom_map(aes(fill = log(y2007)), map = world.ggmap) +
     expand_limits(x = world.ggmap$long, y = world.ggmap$lat) +
-    scale_fill_gradient(low = 'orange', high = 'blue',
-                        guide = 'colorbar') +
-    opts(panel.background = theme_rect(fill = 'skyblue'))
+    scale_fill_gradient(low = "orange", high = "blue",
+                        guide = "colorbar") +
+    opts(panel.background = theme_rect(fill = "skyblue"))
 @
 \noindent There are some holes in the map due to missing data
 from a couple of countries in south central Africa and the Republic of
@@ -531,8 +634,8 @@ of any map downloaded. Here is
 some code for plotting regions of Japan from a recent question on the
 ggplot2 list, courtesy of Charlotte Wickham, adapted to 0.9.0 for
 use with \func{geom\_map}. Her code for 0.8.9 is shown in this
-message: \url{http://groups.google.com/group/ggplot2/msg/7a62718b5f98b12e} Once
-again, the code is not run, but you can
+\href{http://groups.google.com/group/ggplot2/msg/7a62718b5f98b12e}{message}.
+Once again, the code is not run, but you can
 copy and paste it into your \R\ session---just be willing to wait a
 few minutes for all of it to process, since this is a detailed
 administrative map.
@@ -545,7 +648,7 @@ japan_map <- fortify(gadm, region = "ID_2")
 vals <- data.frame(id = unique(japan_map$id), val = rpois(1811, 5))
 ggplot(vals, aes(map_id = id)) + geom_map(aes(fill = val), map = japan_map) +
    expand_limits(x = japan_map$long, y = japan_map$lat) +
-   scale_fill_continuous(low = 'navy', high = 'yellow', guide = 'colorbar')
+   scale_fill_continuous(low = "navy", high = "yellow", guide = "colorbar")
 @
 
 
@@ -567,29 +670,29 @@ pp <- function (n,r=4) {
 base <- ggplot(pp(200), aes(x, y, fill = z))
 base + geom_raster()
 base + geom_raster() +
-    scale_fill_gradientn(colours = terrain.colors(10), guide = 'colorbar')
+    scale_fill_gradientn(colours = terrain.colors(10), guide = "colorbar")
 @
 
 \noindent The following code uses \func{geom\_raster} to plot a correlation matrix:
 <<geom-raster-ex2setup>>=
 # Create a random matrix of 10 columns (variables)
 m <- matrix(rnorm(1000), nrow = 100,
-            dimnames = list(NULL, paste('X', 1:10, sep = '')))
+            dimnames = list(NULL, paste("X", 1:10, sep = "")))
 # Compute the correlation matrix
 cmat <- cor(m)
 # Melt it into a data frame
 cmatm <- melt(cmat)
 # Create two new numeric variables by stripping off the X's in the
 # two factor variables Var1 and Var2:
-cm1 <- mutate(cmatm, X1 = as.numeric(gsub('^X', '', cmatm$Var1)),
-                      X2 = as.numeric(gsub('^X', '', cmatm$Var2)))
+cm1 <- mutate(cmatm, X1 = as.numeric(gsub("^X", "", cmatm$Var1)),
+                      X2 = as.numeric(gsub("^X", "", cmatm$Var2)))
 @
 \noindent Two different ways of producing a correlation plot are shown
 below. As in the previous plot, the one on the left produces a legend
 while the one on the right uses a colorbar.
 <<geom-raster-ex2-corrplot,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
 ggplot(cm1, aes(X1, X2, fill = value)) + geom_raster() + scale_y_reverse()
-last_plot() + scale_fill_continuous(low = 'black', high = 'pink', guide = 'colorbar')
+last_plot() + scale_fill_continuous(low = "black", high = "pink", guide = "colorbar")
 @
 
 \subsection{\func{geom\_dotplot}}
@@ -635,7 +738,7 @@ Dots can be manipulated in certain ways:
     points, whereas values larger than 1 place dots further apart from
     one another.
   \item The \code{binaxis = } argument specifies the axis along which to bin
-    (\code{'x'} or \code{'y'}).
+    (\code{"x"} or \code{"y"}).
 \end{enumerate}
 
 The following example shows the subtle difference between the `dotdensity'
@@ -659,31 +762,32 @@ horizontal direction using the default binwidth (range/30):
 ggplot(mtcars, aes(x = mpg)) + geom_dotplot()
 # alternate stack method (down)
 ggplot(mtcars, aes(x = mpg)) +
-  geom_dotplot(stackdir = 'down')
+  geom_dotplot(stackdir = "down")
 # alternate stack method (center)
 ggplot(mtcars, aes(x = mpg)) +
-  geom_dotplot(stackdir = 'center')
+  geom_dotplot(stackdir = "center")
 # alternate stack method (centerwhole)
 ggplot(mtcars, aes(x = mpg)) +
-  geom_dotplot(stackdir = 'centerwhole')
+  geom_dotplot(stackdir = "centerwhole")
 @
 
 \noindent Similarly, one can stack dots in the vertical direction. To
 do this for a single dot plot, one needs to set \code{x = 1} and make
 the variable the \code{y} in the \func{aes} argument. Observe that
-these are essentially reflections of the plots above rotated $90^\circ$.
+these are essentially reflections of the preceding set of plots
+rotated $90^\circ$.
 <<geom-dotplot-twomethods-onebinwidth-y,fig.width=3,fig.height=3,out.width=0.24\textwidth,fig.show=hold>>=
 # default stack method (up)
-ggplot(mtcars, aes(x = 1, y = mpg)) + geom_dotplot(binaxis = 'y')
+ggplot(mtcars, aes(x = 1, y = mpg)) + geom_dotplot(binaxis = "y")
 # alternate stack method (down)
 ggplot(mtcars, aes(x = 1, y = mpg)) +
-  geom_dotplot(binaxis = 'y', stackdir = 'down')
+  geom_dotplot(binaxis = "y", stackdir = "down")
 # alternate stack method (center)
 ggplot(mtcars, aes(x = 1, y = mpg)) +
-  geom_dotplot(binaxis = 'y', stackdir = 'center')
+  geom_dotplot(binaxis = "y", stackdir = "center")
 # alternate stack method (centerwhole)
 ggplot(mtcars, aes(x = 1, y = mpg)) +
-  geom_dotplot(binaxis = 'y', stackdir = 'center')
+  geom_dotplot(binaxis = "y", stackdir = "center")
 @
 
 \noindent Here are a few examples using the \code{dotsize} and
@@ -703,28 +807,45 @@ meaningless since it is difficult to scale the $y$-axis relative to
 dot size. It is also why 1D dot plots have a lot of empty space
 in most applications. One option is to remove the vertical axis ticks
 altogether by adding the following code snippet to a \func{ggplot} call:
-\begin{verbatim}
+<<scale-removal-1d,echo=TRUE,eval=FALSE>>=
 scale_y_continuous(name = "", breaks = NA)
 ## or if the dot plot is vertical,
 scale_x_continuous(name = "", breaks = NA)
-\end{verbatim}
-
+@
 Much like a box plot, a dot plot is a more interesting graphical
 device when used to compare the distributions of several related groups.
 In this context, dot plots are a better organized method of handling
 overlapping points than jittering. The following pair of plots
-illustrate this idea:
-<<geom-dotplot-ex3,fig.width=3,fig.height=3,out.width=0.45\textwidth,fig.show=hold>>=
+illustrate this idea.
+<<geom-dotplot-ex3>>=
+<<geom-dotplot-ex3-bw,echo=bw_version,eval=bw_version,fig.width=3,fig.height=3,out.width=0.45\textwidth,fig.show=hold>>=
+ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
+   theme_bw() + geom_boxplot(aes(fill = factor(vs)),
+                             alpha = 0.3, outlier.color = NA) +
+   geom_point(position = position_jitter(width = 0.05),
+              colour = "blue", fill = "blue") +
+   labs(x = "vs", y = "mpg", fill = "vs") +
+   scale_fill_grey(start = 0.6, end = 0.8)
+ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
+   theme_bw() + geom_boxplot(aes(fill = factor(vs)),
+                         alpha = 0.3, outlier.color = NA) +
+   geom_dotplot(binaxis = "y", stackdir = "center",
+          position = "dodge", colour = "blue", fill = "blue") +
+   labs(x = "vs", y = "mpg", fill = "vs") +
+   scale_fill_grey(start = 0.6, end = 0.8)
+@
+<<geom-dotplot-ex3-col,echo=!bw_version,eval=!bw_version,fig.width=3,fig.height=3,out.width=0.45\textwidth,fig.show=hold>>=
 ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
    geom_boxplot(aes(fill = factor(vs)), alpha = 0.3, outlier.color = NA) +
    geom_point(position = position_jitter(width = 0.05),
-              colour = 'blue', fill = 'blue') +
-   labs(x = 'vs', y = 'mpg', fill = 'vs')
+              colour = "blue", fill = "blue") +
+   labs(x = "vs", y = "mpg", fill = "vs")
 ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
    geom_boxplot(aes(fill = factor(vs)), alpha = 0.3, outlier.color = NA) +
    geom_dotplot(binaxis = "y", stackdir = "center",
-                position = 'dodge', colour = 'blue', fill = 'blue') +
-   labs(x = 'vs', y = 'mpg', fill = 'vs')
+                position = "dodge", colour = "blue", fill = "blue") +
+   labs(x = "vs", y = "mpg", fill = "vs")
+@
 @
 Whenever a factor is used as an aesthetic
 in a dot plot, the rule is that the dot plot for each level will be
@@ -740,19 +861,34 @@ particular example, the faceted plot makes it easier to see that there
 are no cars with eight cylinders when \code{vs = 1}. Note that in
 the faceted plot, the labeller function \func{label\_both} is used to
 indicate both the factor name and its level in each panel strip.
-<<geom-dotplot-ex4,fig.width=3,fig.height=3,out.width=0.48\textwidth,fig.show=hold>>=
+<<geom-dotplot-ex4>>=
+<<geom-dotplot-ex4-bw,echo=bw_version,eval=bw_version,fig.width=3,fig.height=3,out.width=0.48\textwidth,fig.show=hold>>=
+ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
+  theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center",
+                            position = "dodge") +
+  labs(x = "vs", y = "mpg", fill = "cyl") +
+  scale_fill_grey(start = 0.2, end = 0.9) +
+  opts(legend.position = "top")
+ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
+  theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center") +
+  labs(x = "No. cylinders", y = "mpg", fill = "cyl") +
+  facet_grid(. ~ vs, labeller = label_both) +
+  scale_fill_grey(start = 0.2, end = 0.9) +
+  opts(legend.position = "top")
+@
+<<geom-dotplot-ex4-col,echo=!bw_version,eval=!bw_version,fig.width=3,fig.height=3,out.width=0.48\textwidth,fig.show=hold>>=
 ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
   geom_dotplot(binaxis = "y", stackdir = "center",
                position = "dodge") +
-  labs(x = 'vs', y = 'mpg', fill = 'cyl') +
-  opts(legend.position = 'top')
+  labs(x = "vs", y = "mpg", fill = "cyl") +
+  opts(legend.position = "top")
 ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
   geom_dotplot(binaxis = "y", stackdir = "center") +
-  labs(x = 'No. cylinders', y = 'mpg', fill = 'cyl') +
+  labs(x = "No. cylinders", y = "mpg", fill = "cyl") +
   facet_grid(. ~ vs, labeller = label_both) +
-  opts(legend.position = 'top')
+  opts(legend.position = "top")
 @
-
+@
 \subsection{\func{geom\_violin}}
 
 This function generates violin plots in \pkg{ggplot2}, a way to plot
@@ -768,11 +904,21 @@ proportional to the sample size. In the plot on the far right below,
 the bandwidth of the kernel density estimator is reduced from the
 default 1, which makes for a less smooth density estimate and hence a
 less smooth violin plot.
-<<geom-violin-ex1,fig.width=3,fig.height=2.5,out.width=0.31\textwidth,fig.show=hold>>=
+<<geom-violin-ex1>>=
+<<geom-violin-ex1-bw,eval=bw_version,echo=bw_version,fig.width=3,fig.height=2.5,out.width=0.31\textwidth,fig.show=hold>>=
 p <- ggplot(mtcars, aes(factor(cyl), mpg))
-p + geom_violin()    # default scale is 'count'
+p + geom_violin()    # default scale is "count"
+p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl))) +
+    scale_fill_grey(start = 0.2, end = 0.8) +
+    scale_colour_grey(start = 0.2, end = 0.8) +
+p + geom_violin(adjust = 0.5)
+@
+<<geom-violin-ex1-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=2.5,out.width=0.31\textwidth,fig.show=hold>>=
+p <- ggplot(mtcars, aes(factor(cyl), mpg))
+p + geom_violin()    # default scale is "count"
 p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl)))
 p + geom_violin(adjust = 0.5)
+@
 @
 The next set of plots simply play around with a few extra features.
 The plot on the left adds a strip plot to the violin for each group.
@@ -781,23 +927,42 @@ and is augmented with boxplots. The plot on the far right adds
 a dot plot around the center of each violin, which is useful in that
 the dot plot resembles the shape of the violin (as it should since
 each estimates the underlying true density in its own way).
-<<geom-violin-ex22,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
+<<geom_violin-ex22>>=
+<<geom-violin-ex22-bw,eval=bw_version,echo=bw_version,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
 set.seed(110)
 dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
 ggplot(dat, aes(x=x, y=y)) + geom_violin() + geom_point(shape=21) +
-    xlab('cyl')
+    xlab("cyl")
 ggplot(dat, aes(x = x, y = y)) +
     geom_violin(aes(fill = x, colour = x), alpha = 0.3, width = 0.5) +
     geom_boxplot(aes(fill = x), width = 0.2, outlier.colour = NA) +
-    labs(x = 'cyl', fill = 'cyl', colour = 'cyl') +
+    labs(x = "cyl", fill = "cyl", colour = "cyl") +
+    scale_fill_grey(start = 0.4, end = 0.8) +
+    scale_colour_grey(start = 0.4, end = 0.8) +
     guides(fill = guide_legend(override.aes = list(alpha = 1)))
 ggplot(dat, aes(x = x, y = y)) +
     geom_violin() +
-    geom_dotplot(binaxis = 'y', stackdir = 'center') +
-    xlab('cyl')
+    geom_dotplot(binaxis = "y", stackdir = "center") +
+    xlab("cyl")
+@
+<<geom-violin-ex22-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
+set.seed(110)
+dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
+ggplot(dat, aes(x=x, y=y)) + geom_violin() + geom_point(shape=21) +
+    xlab("cyl")
+ggplot(dat, aes(x = x, y = y)) +
+    geom_violin(aes(fill = x, colour = x), alpha = 0.3, width = 0.5) +
+    geom_boxplot(aes(fill = x), width = 0.2, outlier.colour = NA) +
+    labs(x = "cyl", fill = "cyl", colour = "cyl") +
+    guides(fill = guide_legend(override.aes = list(alpha = 1)))
+ggplot(dat, aes(x = x, y = y)) +
+    geom_violin() +
+    geom_dotplot(binaxis = "y", stackdir = "center") +
+    xlab("cyl")
+@
 @
 
-\newpage
+%\newpage
 
 \section{Improvements in \func{facet\_grid}}
 \label{sec:facetgrid}
@@ -811,7 +976,7 @@ The first plot illustrates a one-dimensional grid with free scales---the
 x scales vary and the panel widths are the same:
 <<facet-grid-example-1d,fig.width=5,fig.height=3>>=
 m <- ggplot(mtcars, aes(mpg, wt, colour = factor(cyl))) + geom_point()
-m + facet_grid(. ~ cyl, scales = 'free') + labs(colour = 'cyl')
+m + facet_grid(. ~ cyl, scales = "free") + labs(colour = "cyl")
 @
 
 Next, we show a set of plots with two-dimensional grids. The first is
@@ -820,18 +985,18 @@ each panel has separate $x$ and $y$ scales. The plot on the right
 shows that \code{margins = TRUE} is once again a viable option in
 \func{facet\_grid}.
 <<facet-grid-2d-example1,fig.width=4,fig.height=3.5,out.width=0.48\textwidth,fig.show=hold>>=
-m + facet_grid(vs ~ am, scales = 'free') + labs(colour = 'cyl') +
-    opts(legend.position = 'top')
-m + facet_grid(vs ~ am, margins = TRUE) + labs(colour = 'cyl') +
-    opts(legend.position = 'top')
+m + facet_grid(vs ~ am, scales = "free") + labs(colour = "cyl") +
+    opts(legend.position = "top")
+m + facet_grid(vs ~ am, margins = TRUE) + labs(colour = "cyl") +
+    opts(legend.position = "top")
 @
 One of the new features, due to the efforts of Willem Hilgenberg, is
 to allow free scales in one direction only. The left plot below produces
 different $x$ scales in the columns while the plot on the right
 produces different $y$ scales:
 <<facet-grid-2d-example2,fig.width=4,fig.height=4,out.width=0.48\textwidth,fig.show=hold>>=
-m + facet_grid(vs ~ am, scales = 'free_x') + labs(colour = 'cyl') +
-    opts(legend.position = 'top')
+m + facet_grid(vs ~ am, scales = "free_x") + labs(colour = "cyl") +
+    opts(legend.position = "top")
 # Add labeller to distinguish levels of vs
 # from those of am:
 m + facet_grid(vs ~ am, scales = "free_y", labeller = label_both) +
@@ -850,10 +1015,12 @@ m + facet_grid(vs ~ am, scales = "free", space = "free_y")
 @
 
 The way strip labels are rendered in \func{facet\_grid} has changed in version
-0.9.0. One now uses the \func{label\_*} functions from the \pkg{scales} package in
-conjunction with the \code{labeller =} argument of \func{facet\_grid};
-see section~\ref{sec:scalespkg} for more details. The
-following example comes from the \func{facet\_grid} help page in 0.9.0:
+0.9.0. One now uses the \func{label\_*} functions from the
+\pkg{scales} package in conjunction with the \code{labeller =}
+argument of \func{facet\_grid}. A couple of examples using the
+\func{label\_both} were shown above; the default labeller is
+\func{label\_value}. The following example from the \func{facet\_grid}
+help page in 0.9.0 demonstrates the other built-in labeling functions:
 <<facet-grid-label-ex,fig.width=4,fig.height=4,out.width=0.48\textwidth,fig.show=hold>>=
 mtcars$cyl2 <- factor(mtcars$cyl, labels = c("alpha", "beta", "sqrt(x, y)"))
 q <- qplot(mpg, wt, data = mtcars) + facet_grid(cyl ~ vs)
@@ -864,8 +1031,9 @@ q + facet_grid(. ~ cyl2, labeller = label_parsed)
 The labeller function \func{label\_bquote} takes a `bquoted'
 expression as its input argument. In previous versions of
 \pkg{ggplot2}, one would define a function and then pass it to the
-\code{labeller = } argument. In \func{label\_parsed}, one passes a
-vector of strings that are parsed into expressions and evaluated.
+\code{labeller = } argument. With \func{label\_parsed}, one passes a
+vector of strings to \func{facet\_grid} that are parsed into
+expressions and evaluated.
 
 \newpage
 
@@ -897,9 +1065,9 @@ the following categories:
 \end{description}
 
 The \func{scale\_*} functions have been rewritten so that both the
-\texttt{breaks = } and
-\texttt{labels = } arguments accept a function as its `value'. A
-new argument \code{trans = } allows one to specify a scale
+\texttt{breaks} and
+\texttt{labels} arguments accept a function as its `value'. A
+new argument \code{trans} allows one to specify a scale
 transformation in \func{scale\_continuous} or \func{scale\_discrete};
 this new argument streamlines the number of continuous axis scaling
 functions in 0.9.0---the only ones that remain are
@@ -975,11 +1143,11 @@ Nearly all of these functions derive from \pkg{ggplot2},
 rewritten to have a consistent format so that it will
 be easier for users to define their own transformation functions. The
 simplest pattern for a transformation function is
-\begin{verbatim}
+<<mytrans,echo=TRUE,eval=FALSE>>=
 my_trans <- function()
-   trans_new('my', function(x) ..., function(x) ...)
-\end{verbatim}
-where the first argument is the name of the transformation, the second
+   trans_new("my", function(x) ..., function(x) ...)
+@
+\noindent where the first argument is the name of the transformation, the second
 argument is the function corresponding to the transformation and the
 third argument is its inverse function. The ellipses are placeholders
 for the function definitions. Two examples are illustrated
@@ -1040,8 +1208,8 @@ The \func{*\_breaks} set of functions
 controls the values that define the rule, which may be formatted by one
 of the \func{*\_format} functions introduced in
 section~\ref{sec:breaks} to produce the labels. In fact, you can think
-of the \code{labels = } argument in 0.9.0 \func{scale\_*} functions as
-a merger of the \code{labels = } and \code{formatter = } arguments in
+of the \code{labels} argument in 0.9.0 \func{scale\_*} functions as
+a merger of the \code{labels} and \code{formatter} arguments from
 previous versions. For dates
 and/or times, one can use the \func{scale\_date} or
 \func{scale\_datetime} functions, which also allow the \code{breaks = }
@@ -1068,13 +1236,13 @@ axis. The plot on
 the left is the default plot whereas the one on the right modifies the
 date breaks and labels as well as expressing the response as a percentage:
 <<date-breaks-labels-ex1,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
-(qp <- qplot(date, psavert, data = economics, geom = 'line') +
-    labs(x = 'Year', y = 'Personal savings rate'))
+(qp <- qplot(date, psavert, data = economics, geom = "line") +
+    labs(x = "Year", y = "Personal savings rate"))
 # Divide savings rate by 100 to get the correct percentages
-qplot(date, psavert/100, data = economics, geom = 'line') +
-    labs(x = 'Year', y = 'Personal savings rate') +
-    scale_x_date(breaks = date_breaks('5 years'),
-                 labels = date_format('%Y')) +
+qplot(date, psavert/100, data = economics, geom = "line") +
+    labs(x = "Year", y = "Personal savings rate") +
+    scale_x_date(breaks = date_breaks("5 years"),
+                 labels = date_format("%Y")) +
     scale_y_continuous(labels = percent)
 @
 \noindent Notice that since \func{percent\_format} has no arguments,
@@ -1083,41 +1251,42 @@ we can simply use the kernel of the function name as the argument of
 
 \noindent As a side note, the equivalent code in version 0.8.9 for the
 plot on the right would be
-\begin{verbatim}
-qplot(date, psavert/100, data = economics, geom = 'line') +
-     labs(x = 'Year', y = 'Personal savings rate') +
-     scale_x_date(major = '5 years') +
-     scale_y_continuous(formatter = 'percent')
-\end{verbatim}
+<<date-breaks-labels-ex1old,echo=TRUE,eval=FALSE>>=
+qplot(date, psavert/100, data = economics, geom = "line") +
+     labs(x = "Year", y = "Personal savings rate") +
+     scale_x_date(major = "5 years") +
+     scale_y_continuous(formatter = "percent")
+@
+
 
 %\noindent The next plot uses both major and minor axis breaks:
 %<<date-breaks-ex2,fig.width=5,fig.height=2.3,message=FALSE,cache=TRUE>>=
-%# qp + scale_x_date(major = '10 years', minor = '5 years')
-%qp + scale_x_date(breaks = date_breaks('10 years'),
-%                 minor_breaks = date_breaks('5 years'),
-%                 labels = date_format('%Y'))
+%# qp + scale_x_date(major = "10 years", minor = "5 years")
+%qp + scale_x_date(breaks = date_breaks("10 years"),
+%                 minor_breaks = date_breaks("5 years"),
+%                 labels = date_format("%Y"))
 %@
 
 \noindent Next, consider an example with datetime data. A
 small fake data frame is constructed to produce a couple of plots
 using datetime axes.
 <<datetime-breaks-ex5a,fig.width=5,fig.height=2>>=
-df2 <- data.frame(times = seq(as.POSIXct('2011-10-20 00:00:00'),
-                              as.POSIXct('2011-10-20 23:59:59'),
-                               by = '30 min'), y = rnorm(48))
+df2 <- data.frame(times = seq(as.POSIXct("2011-10-20 00:00:00"),
+                              as.POSIXct("2011-10-20 23:59:59"),
+                               by = "30 min"), y = rnorm(48))
 # 0.8.9 code:
 # ggplot(df2, aes(x = times, y = y)) + geom_path() +
-#     scale_x_datetime(major = '4 hours', format = '%H:%M:%S')
+#     scale_x_datetime(major = "4 hours", format = "%H:%M:%S")
 # 0.9.0 code:
 # Labels with times only:
 ggplot(df2, aes(x = times, y = y)) + geom_path() +
-      scale_x_datetime(breaks = date_breaks('4 hours'),
-                       labels = date_format('%H:%M:%S'))
+      scale_x_datetime(breaks = date_breaks("4 hours"),
+                       labels = date_format("%H:%M:%S"))
 @
 <<datetime-breaks-ex5b,fig.width=5,fig.height=2>>=
 # Labels with both day and time:
-last_plot() + scale_x_datetime(breaks = date_breaks('6 hours'),
-                               labels = date_format('%b %d\n%H:%M:%S'))
+last_plot() + scale_x_datetime(breaks = date_breaks("6 hours"),
+                               labels = date_format("%b %d\n%H:%M:%S"))
 @
 From these examples, one can see that the \func{date\_breaks} function
 replaces the deprecated argument \code{major = } in \func{scale\_date\_x} and
@@ -1139,13 +1308,13 @@ DF <- data.frame(x = rlnorm(1000, m = 10, sd = 5))
 # on original scale, produces a spiked histogram
 (p <- ggplot(DF, aes(x = x)) + geom_histogram())
 # Apply a scale transformation to x to get the histogram of ln(x):
-p + scale_x_continuous(trans = 'log')
+p + scale_x_continuous(trans = "log")
 @
 \noindent The right side graph would have been called with the
 following code in 0.8.9, with very different axis labels:
-\begin{verbatim}
+<<lognormal-ex1a,echo=TRUE,eval=FALSE>>=
 p + scale_x_log()
-\end{verbatim}
+@
 
 Let's suppose we want to label the horizontal axis so that the labels
 are of the form $e^x$, where $x$ is an integer, similar to what one
@@ -1156,15 +1325,16 @@ and use \func{math\_format} to get the desired labels. The token
 to which the breaks defined in the \func{qplot} call are (implicitly) passed.
 <<logtransform-histogram,fig.width=4,fig.height=2.6>>=
 q <- ggplot(DF, aes(x = log(x))) + geom_histogram()
-q + scale_x_continuous(labels = math_format(e^.x)) + xlab('x')
+q + scale_x_continuous(labels = math_format(e^.x)) + xlab("x")
 @
 
 \noindent The more formal way to do this, starting from the original histogram
 \code{p}, involves use of the \code{trans = } argument with
 corresponding breaks and labels functions:
 <<breaks-after-transform-ex2,eval=FALSE>>=
-p + scale_x_continuous(trans = 'log', breaks = trans_breaks('log', 'exp'),
-                       labels = trans_format('log', math_format(e^.x)))
+p + scale_x_continuous(trans = "log",
+                       breaks = trans_breaks("log", "exp"),
+                       labels = trans_format("log", math_format(e^.x)))
 @
 In this call, a (natural) log transformation is applied to the
 data using the \code{trans = } argument of \func{scale\_x\_continuous},
@@ -1185,8 +1355,8 @@ qplot(carat, price, data = dsmall, alpha = I(0.2)) +
    scale_y_continuous(labels = dollar)
 ## log-linear x-scaling with labels from math_format()
 qplot(carat, price, data = dsmall, alpha = I(0.2)) +
-   scale_x_log10(breaks = trans_breaks('log10', function(x) 10^x),
-                 labels = trans_format('log10', math_format(10^.x))) +
+   scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                 labels = trans_format("log10", math_format(10^.x))) +
    scale_y_continuous(labels = dollar)
 @
 \noindent Observe that the inverse function of
@@ -1240,16 +1410,16 @@ qplot(x, y, data = df1)
 @
 Two ways of plotting the $\sin^{-1}$ transformation of y:
 <<arcsin-trans,fig.width=4,fig.height=2.8,out.width=.45\textwidth,fig.show=hold>>=
-qplot(x, y, data = df1) + scale_y_continuous(trans = 'asn')
-qplot(x, y, data = df1) + coord_trans(ytrans = 'asn')
+qplot(x, y, data = df1) + scale_y_continuous(trans = "asn")
+qplot(x, y, data = df1) + coord_trans(ytrans = "asn")
 @
 
 The lognormal example from the previous section shows this game
 doesn't always work. Run this code in an \R\ session---the second plot
 call throws an error:
 <<lognorm-trans,eval=FALSE>>=
-p + scale_x_continuous(trans = 'log')
-p + coord_trans(xtrans = 'log')
+p + scale_x_continuous(trans = "log")
+p + coord_trans(xtrans = "log")
 @
 In other words, one needs to exercise some care when using scale
 transformations as opposed to coordinate transformations when
@@ -1301,14 +1471,22 @@ number of incremental improvements have been made both in design and
 execution; many of these were described in section~\ref{sec:intro},
 but a more complete list is found in the NEWS file of the package.
 
-Thanks to members of the \code{ggplot2-dev} list for comments on an
-earlier draft of this document. The document was processed using the
+Thanks to members of the \code{ggplot2-dev} list for comments on
+earlier drafts of this document. The document was processed using the
 \pkg{knitr} package, developed by Yihui Xie
-\url{http://yihui.github.com/knitr/}. Special thanks go to Yihui for
+\url{http://yihui.github.com/knitr/}. Special thanks to Yihui for
 patiently answering many elementary questions about the package.
 
-The source code for the color and B/W printer friendly versions is
-located at \url{https://github.com/djmurphy420/ggplot2-transition-guide}.
+\noindent The source code for this version is located at \newline
+\url{https://github.com/djmurphy420/ggplot2-transition-guide} \newline
+in the file \code{ggplot2-0.9.0.Rnw}. By default, the file is set up
+for color highlighting and color printing. For a B/W printer friendly
+version, you need to make two changes: (i) in the first \R\ code chunk
+immediately after the document begins (labeled `setup'), set
+    \code{bw\_version  <- TRUE}; (ii) in the
+\code{SweaveOpts{}} command just before the first section begins, set
+\code{highlight=FALSE}.
+
 We hope that this guide is helpful as you move from 0.8.9 to 0.9.0 and
 that the changes and new facilities of the package aid you in making
 even better ggplots.
