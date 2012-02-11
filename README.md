@@ -1,76 +1,65 @@
-This document is meant to be processed with the knitr package, available at CRAN.
-knitr is a re-implementation of Sweave which does some nice things with a minimum of code.
-For information about the package, see http://yihui.github.com/knitr/ The manuals are 
-found under the Demos link - some of them are pretty interesting, but the two main
-documents are the Manual and Graphics demos. It's worth downloading both the pdf and .Rnw files 
-for reference under each link.
-
-I tried to use figure environments for the code chunks that produce plots, but it created more
-problems than it was worth. One alternative, after the document is stabilized, may be to 
-define figure numbers as leading comments in the pertinent code chunks so that one can refer
-to them that way. It would be nice to have a list of figures in the final document, but the plots 
-take up almost as much space as the text and the LaTeX floats get too far away from the text in 
-several places. The default behavior in knitr is much more pleasing and lets one get away
-with short comments between plot chunks.
+This document is meant to be processed with the knitr package. knitr is a re-implementation 
+of Sweave which does some nice things with a minimum of code.
+For information about the package, see http://yihui.github.com/knitr/ Look under the 
+Demos link for a growing body of documentation - the two main documents are the Manual 
+and Graphics demos. To learn how the package works, it's worth downloading both the pdf 
+and .Rnw files under each link.
 
 The structure of code chunks in knitr is similar to that of Sweave, but the arguments in
 the header are, in general, different. The basic structure is
 
+```r
 <<name,arg1=val1,arg2=val2,...,argk=valk>>=
     your code here
 @
+```
 
+To process this document in R, you need the development versions of ggplot2, scales and 
+knitr, which in turn means that you need to have Rtools loaded. To install the correct 
+versions of the packages,
 
-Here's how the flow works, more or less:
+```r
+library('devtools')
+dev_mode()    # should reply 'dev_mode ON'
+install_github('ggplot2')
+install_github('scales', 'hadley')
+install_github('knitr', 'yihui')
+```
 
-In R:
+Continuing,
 
+```r
+library('ggplot2')
+library('scales')
 library('knitr')
 knit('filename.Rnw')
+```
 
-This will process the .Rnw file and output a filename.tex file that can be run with pdflatex.
-Very similar to Sweave().
+will process the .Rnw file and output a filename.tex file that can be run with pdflatex, either
+from the command line or inside an IDE such as Eclipse or Emacs. Very similar to Sweave(). 
 
-As shown in the existing code chunk headers, no spaces are allowed between arguments inside a 
-code chunk in knitr.
+To get a color copy of the transition guide, create a subdirectory under the one where the .Rnw 
+resides; let's call it col. For B/W, create another directory named bw.
 
+Start up R and setwd() to the directory containing the .Rnw file. Then:
 
-The relevant arguments in a code chunk header are:
-
-fig.width:  actual width of the graphic produced in R (in inches)
-fig.height: actual height -----------  "" ----------------------
-fig.align:  how the figure should be aligned (left,center,right)
-out.width:  width of the plot on the printed page 
-                (usually a fraction of the \textwidth or \linewidth)
-fig.show:   how printed figures should be arranged on a page (asis [default], hold, animate)
-               - asis: one plot for each code chunk that produces a plot
-               - hold: collates plots until the end, where they are processed as a group
-fig.keep:   indicates how plots should be recorded (none, first, last, high [default], all)
-               - high: merges low-level plot changes into the previous high-level plot
-               - all: keeps low-level changes as separate plots
-               - first: keeps only the first plot
-               - last: keeps only the last plot
-               - all: keeps all plots
-message:    should output messages from R be printed in the output?
-cache:      should the plots be cached?
-dev:        plotting device. knitr supports about 20 graphics devices; I've used two thus
-               far: pdf, and png for five graphs whose pdf files exceeded 1Mb each (and choked 
-               my printer). The mixture of pdf and png works fine AFAIK. The tikz device 
-               is supported if you want to include LaTeX code snippets
-               in the graph. See the basic manual for more details.
-
-See the existing examples in the document for guidance. 
-
-This release contains toggles for color or B/W friendly versions. In the first code chunk 
-after \begin{document}, there is a line
+* For color:
+```r
+setwd('./col')
 bw_version <- FALSE
+opts_chunk$set(highlight=TRUE)
+knit2pdf('../ggplot2-0.9.0.Rnw', 'color-guide.tex')
+```
 
-Similarly, in the \SweaveOpts{} line, there is an element  highlight=TRUE. For B/w, reverse 
-the logicals on each, save the .Rnw file and process it through R with knit() as above to get 
-a .tex file with the same root which can then be run (twice) through pdflatex.
+* For a B/W friendly version: from the directory with the .Rnw file,
+```r
+setwd('./bw')
+bw_version <- TRUE
+opts_chunk$set(highlight=FALSE)
+knit2pdf('../ggplot2-0.9.0.Rnw', 'bw-guide.tex')
+```
 
-I haven't done anything fancy - this is my first attempt with knitr, so I've kept it as
-basic as possible.
+That's it. Thanks to Yihui Xie for the script, and of course, for the knitr package.
 
 If you have any questions, e-mail me at djmuseR at gmail dot com.
 

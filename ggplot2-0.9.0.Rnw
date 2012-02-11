@@ -76,7 +76,6 @@
 \begin{document}
 <<setup,echo=FALSE,results=hide,cache=FALSE,message=FALSE>>=
 options(width = 90, replace.assign = TRUE)
-bw_version <- FALSE
 knit_hooks$set(fig = function(before, options, envir){
     if(before && options$fig.show != "none")
         par(mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, cex.axis = 0.9,
@@ -90,6 +89,7 @@ require('rgdal')
 require('maps')
 require('maptools')
 require('rgeos')
+require('MASS')
 @
 
 \title{\fontfamily{phv}\selectfont Changes and Additions to \texttt{ggplot2-0.9.0}}
@@ -103,7 +103,7 @@ require('rgeos')
 \thispagestyle{empty}
 
 %\newpage
-\SweaveOpts{fig.align=center,highlight=TRUE,cache=TRUE,message=FALSE,tidy=FALSE}
+\SweaveOpts{fig.align=center,cache=TRUE,message=FALSE,tidy=FALSE}
 
 \section{Overview}
 \label{sec:intro}
@@ -547,7 +547,7 @@ any of the \code{scale\_colour\_*()} functions allows one to specify a
 colorbar in place of a legend. If no legend or colorbar is desired,
 you can substitute \code{guide = "none"} instead.
 
-\newpage
+%\newpage
 \section{New geoms}
 \label{sec:geoms}
 
@@ -557,7 +557,8 @@ latter two of which were developed by Winston Chang.
 
 \subsection{\func{geom\_map}}
 
-This function is designed to simplify the construction of choropleth
+\func{geom\_map} is a special case of \func{geom\_polygon},
+specifically designed to simplify the construction of choropleth
 maps in \pkg{ggplot2}. The example below comes from the help page,
 which requires the \pkg{maps} package to produce the
 \code{states\_map} data frame using the helper function \func{map\_data}.
@@ -910,7 +911,7 @@ p <- ggplot(mtcars, aes(factor(cyl), mpg))
 p + geom_violin()    # default scale is "count"
 p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl))) +
     scale_fill_grey(start = 0.2, end = 0.8) +
-    scale_colour_grey(start = 0.2, end = 0.8) +
+    scale_colour_grey(start = 0.2, end = 0.8)
 p + geom_violin(adjust = 0.5)
 @
 <<geom-violin-ex1-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=2.5,out.width=0.31\textwidth,fig.show=hold>>=
@@ -1004,7 +1005,7 @@ m + facet_grid(vs ~ am, scales = "free_y", labeller = label_both) +
     opts(legend.position = "top")
 @
 
-\newpage
+%\newpage
 
 \noindent The following plots, which are not shown here, combine free
 scales with free space:
@@ -1035,7 +1036,7 @@ expression as its input argument. In previous versions of
 vector of strings to \func{facet\_grid} that are parsed into
 expressions and evaluated.
 
-\newpage
+%\newpage
 
 \section{\pkg{scales} package}
 \label{sec:scalespkg}
@@ -1368,6 +1369,54 @@ the plot is rendered in the $\log_{10}$ scale. The default choice of
 breaks clearly indicates that the variable on the horizontal axis has
 been transformed.
 
+To define your own scale functions, you will likely need to use
+\func{trans\_breaks} and \func{trans\_format} in some way or
+another. Here is an example using the \code{msleep} data from
+\pkg{MASS}, where both brain weight and body weight require a
+$\log_{10}$ transformation. Suppose you want the 0.8.9 behavior in both
+positional axis; here's one way to do it.
+<<loglogscale,fig.width=4,fig.height=2.5,out.width=.45\textwidth,fig.show=hold>>=
+# Define 'old style' behavior for log10 axes
+scale_x_log10old <- function(...) {
+     scale_x_log10(breaks = trans_breaks('log10', function(x) 10^x),
+                   labels = trans_format('log10', math_format(10^.x)), ...)
+    }
+scale_y_log10old <- function(...) {
+     scale_y_log10(breaks = trans_breaks('log10', function(x) 10^x),
+                   labels = trans_format('log10', math_format(10^.x)), ...)
+    }
+# standard 0.9.0 plot on a log10-log10 scale
+ggplot(msleep, aes(x = bodywt, y = brainwt)) + geom_point() +
+    scale_x_log10() + scale_y_log10()
+# old style axis labeling
+ggplot(msleep, aes(x = bodywt, y = brainwt)) + geom_point() +
+    scale_x_log10old() + scale_y_log10old()
+@
+
+Another example comes from the ggplot2 list, where someone wanted a
+`negative log 10' y-scale. Here are a couple of alternatives to choose
+from; there are certainly others.
+<<neglog10ex,fig.width=4,fig.height=2.5,out.width=.45\textwidth,fig.show=hold>>=
+# Define the negative log 10 function
+neglog10 <- function(x) -log10(x)
+# Reverse scaling (zero on top)
+scale_y_revneglog10 <- function(...) {
+   scale_y_reverse(
+     breaks = trans_breaks('neglog10', function(x) 10^(-x)),
+     labels = trans_format('neglog10', math_format(10^-.x)), ...)
+    }
+# Standard negative log 10 scale
+scale_y_neglog10 <- function(...) {
+   scale_y_log10(
+     breaks = trans_breaks('neglog10', function(x) 10^(-x)),
+     labels = trans_format('neglog10', math_format(10^-.x)), ...)
+    }
+# Example:
+DF <- data.frame(x = 1:10, y = 10^-(1:10))
+ggplot(DF, aes(x, y)) + geom_point() + scale_y_revneglog10()
+ggplot(DF, aes(x, y)) + geom_point() + scale_y_neglog10()
+@
+
 The final example in this subsection illustrates a couple more uses of
 the \func{math\_format} function to place mathematical expressions in
 axis labels.
@@ -1479,19 +1528,14 @@ patiently answering many elementary questions about the package.
 
 \noindent The source code for this version is located at \newline
 \url{https://github.com/djmurphy420/ggplot2-transition-guide} \newline
-in the file \code{ggplot2-0.9.0.Rnw}. By default, the file is set up
-for color highlighting and color printing. For a B/W printer friendly
-version, you need to make two changes: (i) in the first \R\ code chunk
-immediately after the document begins (labeled `setup'), set
-    \code{bw\_version  <- TRUE}; (ii) in the
-\code{SweaveOpts{}} command just before the first section begins, set
-\code{highlight=FALSE}.
+in the file \code{ggplot2-0.9.0.Rnw}. The README file has instructions
+on how to process the \code{.Rnw} file for color or black-and-white printing.
 
 We hope that this guide is helpful as you move from 0.8.9 to 0.9.0 and
 that the changes and new facilities of the package aid you in making
 even better ggplots.
 
-\vspace{30pt}
+\newpage
 
 \section{References}
 
