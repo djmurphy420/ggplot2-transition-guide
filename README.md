@@ -41,9 +41,8 @@ from the command line or inside an IDE such as Eclipse or Emacs. Very similar to
 To get a color copy of the transition guide, create a subdirectory under the one where the .Rnw 
 resides; let's call it col. For B/W, create another directory named bw.
 
-Start up R and setwd() to the directory containing the .Rnw file. Then:
+Start up R and setwd() to the directory containing the .Rnw file. Then for color:
 
-* For color:
 ```r
 setwd('./col')
 bw_version <- FALSE
@@ -51,7 +50,8 @@ opts_chunk$set(highlight=TRUE)
 knit2pdf('../ggplot2-0.9.0.Rnw', 'color-guide.tex')
 ```
 
-* For a B/W friendly version: from the directory with the .Rnw file,
+For a B/W friendly version: from the directory with the .Rnw file,
+
 ```r
 setwd('./bw')
 bw_version <- TRUE
