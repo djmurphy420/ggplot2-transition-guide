@@ -1,8 +1,4 @@
 \documentclass[11pt]{article}
-%\usepackage{fontspec,xltxtra,xunicode}
-%\setromanfont{Georgia}
-%\setsansfont{Tahoma}
-%\setmonofont[Scale=MatchLowercase,Mapping=tex-ansi]{Inconsolata-dz}
 \usepackage[charter]{mathdesign}
 \renewcommand{\sfdefault}{phv}
 \setlength{\parskip}{0.5ex plus0.1ex minus0.1ex}
@@ -90,6 +86,8 @@ require('maps')
 require('maptools')
 require('rgeos')
 require('MASS')
+require('gridExtra')
+require('ReadImages')
 @
 
 \title{\fontfamily{phv}\selectfont Changes and Additions to \texttt{ggplot2-0.9.0}}
@@ -103,7 +101,7 @@ require('MASS')
 \thispagestyle{empty}
 
 %\newpage
-\SweaveOpts{fig.align=center,cache=TRUE,message=FALSE,tidy=FALSE}
+\SweaveOpts{fig.align=center,cache=TRUE,message=FALSE,tidy=FALSE,comment=NA}
 
 \section{Overview}
 \label{sec:intro}
@@ -187,8 +185,8 @@ axes, text annotation and legends.
     section~\ref{sec:geoms}, but see their individual help files
     for more detailed description and examples.
   \item A new set of fortify methods has been written for objects of
-    class \code{multcomp}. See the help page of
-    \func{fortify.multcomp} for further details.
+    class \code{multcomp}. See the \code{fortify-multcomp} help page
+     for an overview.
   \item Four new \code{stat\_} functions make their debut:
     \begin{itemize}
       \item  \func{stat\_summary2d}, which applies a function over a 2D
@@ -206,9 +204,10 @@ axes, text annotation and legends.
     problem when a faceting variable was the name of an aesthetic (\eg
     colour or size). You can now expect that code like the following
     will work:
-    <<code0,eval=FALSE>>=
-    ggplot(df, aes(x, y, group = group, colour = color))
-    @
+<<code0,echo=TRUE,eval=FALSE>>=
+ggplot(df, aes(x, y, group = group, colour = color))
+@
+
   \item The problem with axis titles being too close to axis labels at
     the default font size has been fixed in 0.9.0. In addition, axis
     titles are now centered with respect to the panels rather than the
@@ -238,6 +237,12 @@ axes, text annotation and legends.
     which plots data in the order in which they were recorded,
     and \func{ggstructure}, which is designed to highlight structural
     anomalies in numeric multivariate data should they exist.
+  \item New help pages (\code{translate\_*}) have been written by Jake
+    Russ to show the connections
+    between \func{qplot} and base graphics, \func{qplot} and
+    \func{ggplot}, \func{qplot} and the Graphics Production Library
+    (GPL) as well as differences between \pkg{ggplot2} and
+    \pkg{lattice}.
 \end{itemize}
 
 \subsection{Not so visible changes}
@@ -281,8 +286,8 @@ co-developers. Some of the changes in progress include the following:
 \label{sec:guides}
 
 Control over legends is greatly expanded in version 0.9.0, largely due
-to the efforts of Kohske Takahashi. The two functions
-discussed in this section are \func{guide\_legend} and
+to the efforts of Kohske Takahashi. Two functions are
+discussed in this section: \func{guide\_legend} and
 \func{guide\_colorbar}. We discuss these first because they will be
 used extensively in the sections to follow.
 
@@ -291,7 +296,11 @@ guides and annotation guides\footnote{These include main titles,
   embedded text in the graphics region using \func{annotate} or
   \func{geom\_text} and other annotations such as the North arrow in a
   spatial plot.}. In the former group lie positional guides,
-discussed in section~\ref{sec:axes}, and legends, discussed herein. Legends are
+discussed in section~\ref{sec:axes}, and legends, discussed
+herein. Annotation guides include \func{geom\_text}, \func{annotate}
+and the new annotation functions in section~\ref{sec:annotation}.
+
+Legends are
 associated with aesthetics corresponding to plot attributes such as
 color, fill color, size, line type or plotting character shape. One
 can still use the \code{scale\_*()} functions as before (\eg
@@ -299,7 +308,7 @@ can still use the \code{scale\_*()} functions as before (\eg
 functions provide a user with more control over aspects of the
 legend display. Both functions have numerous examples in their
 respective help pages that illustrate each argument at least once.
-We will show a few that may occur commonly in practice in the
+Some that may occur commonly in practice are illustrated in the
 following two subsections. Bear in mind that legend guides are
 meant to be associated with discrete-valued aesthetics while colorbar
 guides are meant to correspond to continuous-valued aesthetics.
@@ -325,13 +334,16 @@ those that are common to both legend guides and colorbar guides:
    & \code{label.vjust}  & vertical justification  \\ \hline
 \multirow{2}{1cm}{key options}
    & \code{default.unit} & measurement unit    \\
-   & \code{direction}   & \code{"horizontal"} or \code{"vertical"} \\ \hline
+   & \code{direction}   & \code{"horizontal"} or \code{"vertical"} \\
+   & \code{reverse}     & reverse direction of keys    \\  \hline
   \end{tabular}
 \end{center}
 \noindent The titles and labels of guides can be manipulated in
 similar ways since both have the same set of arguments. The
 \code{title/label.theme} argument allows one to adjust the properties of titles
-and/or labels that are covered by the \func{theme\_text} function.
+and/or labels that are covered by the \func{theme\_text} function. The
+\code{reverse} argument allows one to reverse the order of legend keys
+or colors in a colorbar.
 
 \subsection{\func{guide\_legend}}
 \label{sec:legend}
@@ -400,14 +412,14 @@ function call as its value. The \code{guide = } argument is
 specific to scale functions for aesthetics, just as \code{trans = } is
 specific to positional scale functions\footnote{See section~\ref{sec:axes}.}.
 <<guide-legend-ex2>>=
-<<gl2-bw,eval=bw_version,echo=bw_version,fig.width=4.5,fig.height=2.5>>=
+<<gl2-bw,eval=FALSE,echo=bw_version>>=
 q + theme_bw() + scale_fill_discrete(
           guide = guide_legend(nrow = 4, title.hjust = 0.4,
           title.theme = theme_text(size = 12, face = "bold"))) +
     scale_fill_grey(start = 0.1, end = 0.9) +
     xlim(45, 75)
 @
-<<gl2-col,eval=!bw_version,echo=!bw_version,fig.width=4.5,fig.height=2.5>>=
+<<gl2-col,eval=FALSE,echo=!bw_version>>=
 q + scale_fill_discrete(guide = guide_legend(nrow = 4,
        title.hjust = 0.4,
        title.theme = theme_text(size = 12, face = "bold"))) +
@@ -486,7 +498,7 @@ p1 + guides(fill = guide_colorbar(barwidth = 0.5, barheight = 10))
 @
 The examples above indicate that if the fill and size aesthetics are
 both associated with the same variable and both produce a legend, the
-legends can be merged into one, ae we saw with the plot of \code{p1}
+legends can be merged into one, as we saw with the plot of \code{p1}
 at the top of this subsection. However, if one aesthetic uses a legend
 guide and another uses a colorbar guide, the two cannot be merged,
 even if both aesthetics correspond to the same variable. This is seen in
@@ -788,7 +800,7 @@ ggplot(mtcars, aes(x = 1, y = mpg)) +
   geom_dotplot(binaxis = "y", stackdir = "center")
 # alternate stack method (centerwhole)
 ggplot(mtcars, aes(x = 1, y = mpg)) +
-  geom_dotplot(binaxis = "y", stackdir = "center")
+  geom_dotplot(binaxis = "y", stackdir = "centerwhole")
 @
 
 \noindent Here are a few examples using the \code{dotsize} and
@@ -963,7 +975,96 @@ ggplot(dat, aes(x = x, y = y)) +
 @
 @
 
-%\newpage
+\newpage
+\section{New annotation functions}
+\label{sec:annotation}
+
+Version 0.9.0 debuts three new functions for annotation of graphics:
+\func{annotation\_raster}, \func{annotation\_map} and
+\func{annotation\_custom}. These can be used to decorate a \code{ggplot}:
+\begin{itemize}
+  \item \func{annotation\_raster} allows one to insert a (raster) image
+    into a plot. It can serve as a plot background (see the example
+    below) or be a graphical object positioned somewhere in the
+    graphics area of a \code{ggplot}.
+  \item \func{annotation\_map} allows one to insert a map inside of a
+    graphics region, \eg as an inset.
+  \item \func{annotation\_custom} allows one to insert graphs,
+    tables or other graphical objects of value in a graphic.
+\end{itemize}
+
+The first example is a modification of the
+example in \func{annotation\_raster} to combine all
+three new annotation functions in one graphic.
+<<baptiste-example,fig.width=5,fig.height=5>>=
+p <- qplot(mpg, wt, data = mtcars) + theme_bw()
+## color gradient
+rainbow <- t(hcl(seq(0, 360, length = 300 * 50), 80, 70))
+## scaled down map of NZ
+nz <- transform(map_data("nz"), long = scale(long) + 15,
+               lat = scale(lat)/5 + 2)
+# Inset plot
+g <- ggplotGrob(p)
+# Put it together:
+p + annotation_raster(rainbow, -Inf, Inf, -Inf, Inf) +
+    geom_point() +
+    annotation_map(nz, fill = "NA", colour = "grey50") +
+    annotation_custom(grob = g, xmin = 25, xmax = 35,
+                      ymin = 3.5, ymax = 5)
+@
+
+The next example inserts a table and a picture in the graphic using
+the \code{InsectSprays} data. The
+table is produced from the \func{tableGrob} function in the
+\pkg{gridExtra} package.
+<<annotation-example,fig.width=5,fig.height=5>>=
+ISsumm <- ddply(InsectSprays, .(spray), summarise,
+                mean = mean(count), sd = sd(count))
+tb <- tableGrob(ISsumm, rows = ISsumm$spray, show.rownames = FALSE,
+                gpar.corefill = gpar(fill = "white"))
+hadley <- read.jpeg("hadley.jpg")
+ggplot(ISsumm, aes(x = spray, y = mean)) +
+    geom_boxplot(data = InsectSprays, aes(y = count),
+                 fill = "blue", alpha = 0.2,
+                 size = 0.7, outlier.colour = NA) +
+    geom_point(data = InsectSprays, aes(y = count), size = 2.5,
+               position = position_jitter(width = 0.1)) +
+    ylim(0, 40) + labs(x = "Spray", y = "Insect count") +
+    annotation_custom(grob = tb, xmin = 0.5, xmax = 3.5,
+                                 ymin = 25, ymax = 40) +
+    annotation_raster(hadley, xmin = 5.5, xmax = 6.5,
+                              ymin = 30, ymax = 40)
+@
+\noindent Note that the \func{read.jpeg} function comes from the
+\pkg{ReadImages} package, designed to read JPEG and PNG files.
+
+If you resize a \code{ggplot} graphic in a document with decorations
+such as those shown in the previous two examples, there is no guarantee that
+the decorations will scale in the same ratio as the rest of the
+graphic. Maps and rasters will scale proportionally with the plot, but
+custom grobs may not scale at all, such as the \code{tableGrob}
+produced in the graphic above. When adding
+annotations to a graphic that will end up in a document, it may be a good idea
+to create a graphics window in \R\ of the same size as what you want
+in the document. By developing the graphic at that size,
+you should have more confidence that what you see in \R\ is what
+you'll see in the document.
+
+Another aspect of annotations in \pkg{ggplot2} is that they are
+displayed in each facet because they are insensitive to
+mapping. Here's a simple example:
+<<facets-with-raster,fig.width=3.5,fig.height=3.5>>=
+DF <- data.frame(x = 1:10, y1 = rnorm(10), y2 = rnorm(10))
+# Read in the R logo:
+Rlogo <- read.jpeg("Rlogo.jpg")
+# Melt and plot:
+dfm <- melt(DF, id = "x")
+ggplot(dfm, aes(x = x, y = value)) + geom_path() +
+    ylim(-3, 3) + theme_bw() +
+    annotation_raster(Rlogo, xmin= 7.6, xmax = 10,
+                             ymin = 2, ymax = 3) +
+    facet_wrap(~ variable)
+@
 
 \section{Improvements in \func{facet\_grid}}
 \label{sec:facetgrid}
@@ -991,7 +1092,7 @@ m + facet_grid(vs ~ am, scales = "free") + labs(colour = "cyl") +
 m + facet_grid(vs ~ am, margins = TRUE) + labs(colour = "cyl") +
     opts(legend.position = "top")
 @
-One of the new features, due to the efforts of Willem Hilgenberg, is
+One of the new features, due to the efforts of Willem Ligtenberg, is
 to allow free scales in one direction only. The left plot below produces
 different $x$ scales in the columns while the plot on the right
 produces different $y$ scales:
@@ -1100,6 +1201,7 @@ Except for the \func{*\_pal} functions, these will normally be used
 inside a \func{scale\_*} function call; several examples are given in
 section~\ref{sec:axes}.
 
+\newpage
 \subsection{Functions to manage breaks, axis labels and strip labels}
 \label{sec:breaks}
 
@@ -1379,11 +1481,11 @@ positional axis; here's one way to do it.
 # Define 'old style' behavior for log10 axes
 scale_x_log10old <- function(...) {
      scale_x_log10(breaks = trans_breaks('log10', function(x) 10^x),
-                   labels = trans_format('log10', math_format(10^.x)), ...)
+            labels = trans_format('log10', math_format(10^.x)), ...)
     }
 scale_y_log10old <- function(...) {
      scale_y_log10(breaks = trans_breaks('log10', function(x) 10^x),
-                   labels = trans_format('log10', math_format(10^.x)), ...)
+            labels = trans_format('log10', math_format(10^.x)), ...)
     }
 # standard 0.9.0 plot on a log10-log10 scale
 ggplot(msleep, aes(x = bodywt, y = brainwt)) + geom_point() +
@@ -1427,7 +1529,8 @@ ggplot(d, aes(x, y)) + geom_point() +
   scale_x_continuous(breaks = 1:10, labels = math_format(alpha + .x))
 ## Define a vector of breaks manually:
 lb <- seq(1, 9, by = 2)
-last_plot() + scale_x_continuous(breaks = lb, labels = math_format(beta^.x))
+last_plot() +
+  scale_x_continuous(breaks = lb, labels = math_format(beta^.x))
 @
 In both cases, the second set of arguments of \func{math\_format} are
 implicit from the defined set of breaks. An expression is passed as
@@ -1437,8 +1540,10 @@ input to create the labels. We could also have called
 \func{math\_format} with two explicit sets of arguments as follows:
 <<axis-labels-math1b,eval=FALSE>>=
 ggplot(d, aes(x, y)) + geom_point() +
-  scale_x_continuous(breaks = 1:10, labels = math_format(alpha + .x)(1:10))
-last_plot() + scale_x_continuous(breaks = lb, labels = math_format(beta^.x)(lb))
+  scale_x_continuous(breaks = 1:10,
+                     labels = math_format(alpha + .x)(1:10))
+last_plot() + scale_x_continuous(breaks = lb,
+                                 labels = math_format(beta^.x)(lb))
 @
 
 
@@ -1457,7 +1562,7 @@ difference in appearance depending on when the transformation is applied.
 df1 <- data.frame(x = 1:10, y = round(runif(10), 3))
 qplot(x, y, data = df1)
 @
-Two ways of plotting the $\sin^{-1}$ transformation of y:
+\noindent Two ways of plotting the $\sin^{-1}$ transformation of y:
 <<arcsin-trans,fig.width=4,fig.height=2.8,out.width=.45\textwidth,fig.show=hold>>=
 qplot(x, y, data = df1) + scale_y_continuous(trans = "asn")
 qplot(x, y, data = df1) + coord_trans(ytrans = "asn")
@@ -1470,7 +1575,7 @@ call throws an error:
 p + scale_x_continuous(trans = "log")
 p + coord_trans(xtrans = "log")
 @
-In other words, one needs to exercise some care when using scale
+\noindent In other words, one needs to exercise some care when using scale
 transformations as opposed to coordinate transformations when
 statistical transforms of the data are involved.
 
@@ -1499,7 +1604,7 @@ x)$, which happens to be a transform-both-sides model (Carroll and
 Ruppert, 1988) since the same coordinate transformation was applied to
 both sides of the fitted model.
 
-Separate transformations for $x$ and $y$ are also possible:
+\noindent Separate transformations for $x$ and $y$ are also possible:
 <<indep-trans,dev=png,fig.width=3.5,fig.height=2.5>>=
 qplot(carat, price, data = d, alpha = I(0.05)) +
    geom_smooth(method="lm", size = 1) +
@@ -1521,21 +1626,25 @@ execution; many of these were described in section~\ref{sec:intro},
 but a more complete list is found in the NEWS file of the package.
 
 Thanks to members of the \code{ggplot2-dev} list for comments on
-earlier drafts of this document. The document was processed using the
-\pkg{knitr} package, developed by Yihui Xie
-\url{http://yihui.github.com/knitr/}. Special thanks to Yihui for
+earlier drafts of this document. Notably, Baptiste Auguie suggested the section
+on annotations and provided valuable guidance and examples, and
+Winston Chang provided numerous insights and suggestions regarding
+\func{geom\_dotplot} and \func{geom\_violin}.
+
+The document was processed using the \pkg{knitr} package, developed by Yihui Xie
+\url{http://yihui.name/knitr/}. Special thanks to Yihui for
 patiently answering many elementary questions about the package.
 
 \noindent The source code for this version is located at \newline
 \url{https://github.com/djmurphy420/ggplot2-transition-guide} \newline
 in the file \code{ggplot2-0.9.0.Rnw}. The README file has instructions
-on how to process the \code{.Rnw} file for color or black-and-white printing.
+for processing the \code{.Rnw} file for color or black-and-white printing.
 
 We hope that this guide is helpful as you move from 0.8.9 to 0.9.0 and
 that the changes and new facilities of the package aid you in making
 even better ggplots.
 
-\newpage
+%\newpage
 
 \section{References}
 

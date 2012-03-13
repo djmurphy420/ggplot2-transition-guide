@@ -47,7 +47,7 @@ Start up R and setwd() to the directory containing the .Rnw file. Then for color
 setwd('./col')
 bw_version <- FALSE
 opts_chunk$set(highlight=TRUE)
-knit2pdf('../ggplot2-0.9.0.Rnw', 'color-guide.tex')
+knit2pdf('../ggplot2-0.9.0.Rnw')
 ```
 
 For a B/W friendly version: from the directory with the .Rnw file,
@@ -56,7 +56,7 @@ For a B/W friendly version: from the directory with the .Rnw file,
 setwd('./bw')
 bw_version <- TRUE
 opts_chunk$set(highlight=FALSE)
-knit2pdf('../ggplot2-0.9.0.Rnw', 'bw-guide.tex')
+knit2pdf('../ggplot2-0.9.0.Rnw')
 ```
 
 That's it. Thanks to Yihui Xie for the script, and of course, for the knitr package.
