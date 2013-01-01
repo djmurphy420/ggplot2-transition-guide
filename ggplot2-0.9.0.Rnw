@@ -72,11 +72,6 @@
 \begin{document}
 <<setup,include=FALSE,cache=FALSE>>=
 options(width = 90, replace.assign = TRUE)
-knit_hooks$set(fig = function(before, options, envir){
-    if(before && options$fig.show != "none")
-        par(mar = c(4, 4, 0.1, 0.1), cex.lab = 0.95, cex.axis = 0.9,
-            mgp = c(2, 0.7, 0), tcl = -0.3)
-      } )
 require('ggplot2')
 require('plyr')
 require('reshape2')
