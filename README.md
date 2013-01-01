@@ -43,7 +43,6 @@ Start up R and setwd() to the directory containing the .Rnw file. Then for color
 ```r
 setwd('./col')
 bw_version <- FALSE
-opts_chunk$set(highlight=TRUE)
 knit2pdf('../ggplot2-0.9.0.Rnw')
 ```
 
@@ -52,7 +51,6 @@ For a B/W friendly version: from the directory with the .Rnw file,
 ```r
 setwd('./bw')
 bw_version <- TRUE
-opts_chunk$set(highlight=FALSE)
 knit2pdf('../ggplot2-0.9.0.Rnw')
 ```
 

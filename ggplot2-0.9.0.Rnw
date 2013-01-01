@@ -84,6 +84,12 @@ require('MASS')
 require('gridExtra')
 require('ReadImages')
 opts_chunk$set(fig.align='center',cache=TRUE,message=FALSE,tidy=FALSE,comment=NA)
+
+# you can change bw_version=TRUE to get a B/W version
+if (!exists('bw_version')) bw_version <- FALSE
+if (bw_version) {
+  opts_chunk$set(highlight = FALSE, cache.path = 'cache-bw/')
+}
 @
 
 \title{\fontfamily{phv}\selectfont Changes and Additions to \texttt{ggplot2-0.9.0}}
