@@ -83,6 +83,7 @@ require('rgeos')
 require('MASS')
 require('gridExtra')
 require('ReadImages')
+opts_chunk$set(fig.align='center',cache=TRUE,message=FALSE,tidy=FALSE,comment=NA)
 @
 
 \title{\fontfamily{phv}\selectfont Changes and Additions to \texttt{ggplot2-0.9.0}}
@@ -96,7 +97,6 @@ require('ReadImages')
 \thispagestyle{empty}
 
 %\newpage
-\SweaveOpts{fig.align=center,cache=TRUE,message=FALSE,tidy=FALSE,comment=NA}
 
 \section{Overview}
 \label{sec:intro}
