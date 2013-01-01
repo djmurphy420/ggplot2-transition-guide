@@ -1,6 +1,6 @@
 This document is meant to be processed with the knitr package. knitr is a re-implementation 
 of Sweave which does some nice things with a minimum of code.
-For information about the package, see http://yihui.github.com/knitr/ Look under the 
+For information about the package, see http://yihui.name/knitr/ Look under the
 Demos link for a growing body of documentation - the two main documents are the Manual 
 and Graphics demos. To learn how the package works, it's worth downloading both the pdf 
 and .Rnw files under each link.
@@ -20,8 +20,7 @@ versions of the packages,
 
 ```r
 library('devtools')
-dev_mode()    # should reply 'dev_mode ON'
-install_github('ggplot2')
+install_github('ggplot2', 'hadley')
 install_github('scales', 'hadley')
 install_github('knitr', 'yihui')
 ```
@@ -29,8 +28,6 @@ install_github('knitr', 'yihui')
 Continuing,
 
 ```r
-library('ggplot2')
-library('scales')
 library('knitr')
 knit('filename.Rnw')
 ```
@@ -46,7 +43,6 @@ Start up R and setwd() to the directory containing the .Rnw file. Then for color
 ```r
 setwd('./col')
 bw_version <- FALSE
-opts_chunk$set(highlight=TRUE)
 knit2pdf('../ggplot2-0.9.0.Rnw')
 ```
 
@@ -55,7 +51,6 @@ For a B/W friendly version: from the directory with the .Rnw file,
 ```r
 setwd('./bw')
 bw_version <- TRUE
-opts_chunk$set(highlight=FALSE)
 knit2pdf('../ggplot2-0.9.0.Rnw')
 ```
 
