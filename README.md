@@ -20,8 +20,7 @@ versions of the packages,
 
 ```r
 library('devtools')
-dev_mode()    # should reply 'dev_mode ON'
-install_github('ggplot2')
+install_github('ggplot2', 'hadley')
 install_github('scales', 'hadley')
 install_github('knitr', 'yihui')
 ```
