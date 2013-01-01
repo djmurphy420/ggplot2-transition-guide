@@ -1059,7 +1059,7 @@ mapping. Here's a simple example:
 <<facets-with-raster,fig.width=3.5,fig.height=3.5>>=
 DF <- data.frame(x = 1:10, y1 = rnorm(10), y2 = rnorm(10))
 # Read in the R logo:
-Rlogo <- read.jpeg("Rlogo.jpg")
+Rlogo <- read.jpeg(file.path(R.home("doc"), "html", "logo.jpg"))
 # Melt and plot:
 dfm <- melt(DF, id = "x")
 ggplot(dfm, aes(x = x, y = value)) + geom_path() +
