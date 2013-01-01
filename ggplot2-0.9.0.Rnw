@@ -70,7 +70,7 @@
 \DeclareMathOperator{\corr}{corr}
 %
 \begin{document}
-<<setup,echo=FALSE,results=hide,cache=FALSE,message=FALSE>>=
+<<setup,include=FALSE,cache=FALSE>>=
 options(width = 90, replace.assign = TRUE)
 knit_hooks$set(fig = function(before, options, envir){
     if(before && options$fig.show != "none")
