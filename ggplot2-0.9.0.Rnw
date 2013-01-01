@@ -405,14 +405,14 @@ q + guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
        title.theme = element_text(size = 12, face = "bold", angle = 0))) +
     xlim(45, 75)
 @
-@
+
 The same graph can be made by replacing the \func{guides} call with
 one to \func{scale\_fill\_discrete}, where the new \code{guide = }
 argument is used to make the legend using a \func{guide\_legend}
 function call as its value. The \code{guide = } argument is
 specific to scale functions for aesthetics, just as \code{trans = } is
 specific to positional scale functions\footnote{See section~\ref{sec:axes}.}.
-<<guide-legend-ex2>>=
+
 <<gl2-bw,eval=FALSE,echo=bw_version>>=
 q + theme_bw() + scale_fill_discrete(
           guide = guide_legend(nrow = 4, title.hjust = 0.4,
@@ -426,7 +426,7 @@ q + scale_fill_discrete(guide = guide_legend(nrow = 4,
        title.theme = element_text(size = 12, face = "bold"))) +
     xlim(45, 75)
 @
-@
+
 The following example concerns an application that comes up occasionally
 on the ggplot2 list: overriding the alpha transparency value in
 the legend so that the values of an aesthetic are visible in the legend key. The
@@ -434,7 +434,7 @@ relevant argument is \code{override.aes}: in the left side plot, the
 very low alpha value makes it impossible to see the legend key items, but
 \code{override.aes} resets the alpha value in the legend to make them
 visible in the right hand plot.
-<<guide-legend-ex3,dev=png,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
+<<guide-legend-ex3,dev='png',fig.width=4,fig.height=2.8,out.width='0.45\\textwidth',fig.show='hold'>>=
 (p3 <- qplot(carat, price, data = diamonds, colour = color,
              alpha = I(0.01)) +
          scale_y_continuous(labels = dollar))
@@ -493,7 +493,7 @@ p1 + guides(fill = guide_colorbar())
 @
 \noindent The following figure illustrates the first and third
 methods, respectively:
-<<guide-colorbar-ex2,fig.width=4.5,fig.height=3.5,out.width=0.45\textwidth,fig.show=hold>>=
+<<guide-colorbar-ex2,fig.width=4.5,fig.height=3.5,out.width='0.45\\textwidth',fig.show='hold'>>=
 p1 + scale_fill_continuous(guide = "colorbar")
 p1 + guides(fill = guide_colorbar(barwidth = 0.5, barheight = 10))
 @
@@ -673,7 +673,7 @@ This function is a more efficient version of
 size. Here is an example, slightly modified from its help page; the
 left plot uses a continuous color legend, while the one on the right
 uses a colorbar instead.
-<<geom-raster-ex1,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
+<<geom-raster-ex1,fig.width=4,fig.height=2.8,out.width='0.45\\textwidth',fig.show='hold'>>=
 pp <- function (n,r=4) {
  x <- seq(-r*pi, r*pi, len=n)
  df <- expand.grid(x=x, y=x)
@@ -704,7 +704,7 @@ cm1 <- mutate(cmatm, X1 = as.numeric(gsub("^X", "", cmatm$Var1)),
 \noindent Two different ways of producing a correlation plot are shown
 below. As in the previous plot, the one on the left produces a legend
 while the one on the right uses a colorbar.
-<<geom-raster-ex2-corrplot,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
+<<geom-raster-ex2-corrplot,fig.width=4,fig.height=2.8,out.width='0.45\\textwidth',fig.show='hold'>>=
 ggplot(cm1, aes(X1, X2, fill = value)) + geom_raster() + scale_y_reverse()
 last_plot() + scale_fill_continuous(low = "black", high = "pink", guide = "colorbar")
 @
@@ -757,7 +757,7 @@ Dots can be manipulated in certain ways:
 
 The following example shows the subtle difference between the `dotdensity'
 and `histodot' methods when the binwidth is specified:
-<<geom-dotplot-twomethods-onebinwidth,fig.width=3,fig.height=3,out.width=0.45\textwidth,fig.show=hold>>=
+<<geom-dotplot-twomethods-onebinwidth,fig.width=3,fig.height=3,out.width='0.45\\textwidth',fig.show='hold'>>=
 # default dotdensity method (left)
 ggplot(mtcars, aes(x = mpg)) + geom_dotplot(binwidth = 1.5)
 # histodot method (right)
@@ -771,7 +771,7 @@ larger in the left plot (which uses the `dotdensity' algorithm).
 
 The next example shows several ways to stack dots in a 1D dot plot in the
 horizontal direction using the default binwidth (range/30):
-<<geom-dotplot-twomethods-onebinwidth-x,fig.width=3,fig.height=3,out.width=0.24\textwidth,fig.show=hold>>=
+<<geom-dotplot-twomethods-onebinwidth-x,fig.width=3,fig.height=3,out.width='0.24\\textwidth',fig.show='hold'>>=
 # default stack method (up)
 ggplot(mtcars, aes(x = mpg)) + geom_dotplot()
 # alternate stack method (down)
@@ -790,7 +790,7 @@ do this for a single dot plot, one needs to set \code{x = 1} and make
 the variable the \code{y} in the \func{aes} argument. Observe that
 these are essentially reflections of the preceding set of plots
 rotated $90^\circ$.
-<<geom-dotplot-twomethods-onebinwidth-y,fig.width=3,fig.height=3,out.width=0.24\textwidth,fig.show=hold>>=
+<<geom-dotplot-twomethods-onebinwidth-y,fig.width=3,fig.height=3,out.width='0.24\\textwidth',fig.show='hold'>>=
 # default stack method (up)
 ggplot(mtcars, aes(x = 1, y = mpg)) + geom_dotplot(binaxis = "y")
 # alternate stack method (down)
@@ -806,7 +806,7 @@ ggplot(mtcars, aes(x = 1, y = mpg)) +
 
 \noindent Here are a few examples using the \code{dotsize} and
 \code{stackratio} arguments:
-<<geom-dotplot-dotsize-stackratio,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
+<<geom-dotplot-dotsize-stackratio,fig.width=3,fig.height=3,out.width='0.31\\textwidth',fig.show='hold'>>=
 # base plot
 ggplot(mtcars, aes(x = mpg)) + geom_dotplot()
 # increase the dot size
@@ -821,7 +821,7 @@ meaningless since it is difficult to scale the $y$-axis relative to
 dot size. It is also why 1D dot plots have a lot of empty space
 in most applications. One option is to remove the vertical axis ticks
 altogether by adding the following code snippet to a \func{ggplot} call:
-<<scale-removal-1d,echo=TRUE,eval=FALSE>>=
+<<'scale-removal-1d',echo=TRUE,eval=FALSE>>=
 scale_y_continuous(name = "", breaks = NA)
 ## or if the dot plot is vertical,
 scale_x_continuous(name = "", breaks = NA)
@@ -831,8 +831,8 @@ device when used to compare the distributions of several related groups.
 In this context, dot plots are a better organized method of handling
 overlapping points than jittering. The following pair of plots
 illustrate this idea.
-<<geom-dotplot-ex3>>=
-<<geom-dotplot-ex3-bw,echo=bw_version,eval=bw_version,fig.width=3,fig.height=3,out.width=0.45\textwidth,fig.show=hold>>=
+
+<<geom-dotplot-ex3-bw,echo=bw_version,eval=bw_version,fig.width=3,fig.height=3,out.width='0.45\\textwidth',fig.show='hold'>>=
 ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
    theme_bw() + geom_boxplot(aes(fill = factor(vs)),
                              alpha = 0.3, outlier.color = NA) +
@@ -848,7 +848,7 @@ ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
    labs(x = "vs", y = "mpg", fill = "vs") +
    scale_fill_grey(start = 0.6, end = 0.8)
 @
-<<geom-dotplot-ex3-col,echo=!bw_version,eval=!bw_version,fig.width=3,fig.height=3,out.width=0.45\textwidth,fig.show=hold>>=
+<<geom-dotplot-ex3-col,echo=!bw_version,eval=!bw_version,fig.width=3,fig.height=3,out.width='0.45\\textwidth',fig.show='hold'>>=
 ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
    geom_boxplot(aes(fill = factor(vs)), alpha = 0.3, outlier.color = NA) +
    geom_point(position = position_jitter(width = 0.05),
@@ -860,7 +860,7 @@ ggplot(mtcars, aes(x = factor(vs), y = mpg)) +
                 position = "dodge", colour = "blue", fill = "blue") +
    labs(x = "vs", y = "mpg", fill = "vs")
 @
-@
+
 Whenever a factor is used as an aesthetic
 in a dot plot, the rule is that the dot plot for each level will be
 dodged; this is also the case when multiple factors are at play.
@@ -875,8 +875,8 @@ particular example, the faceted plot makes it easier to see that there
 are no cars with eight cylinders when \code{vs = 1}. Note that in
 the faceted plot, the labeller function \func{label\_both} is used to
 indicate both the factor name and its level in each panel strip.
-<<geom-dotplot-ex4>>=
-<<geom-dotplot-ex4-bw,echo=bw_version,eval=bw_version,fig.width=3,fig.height=3,out.width=0.48\textwidth,fig.show=hold>>=
+
+<<geom-dotplot-ex4-bw,echo=bw_version,eval=bw_version,fig.width=3,fig.height=3,out.width='0.48\\textwidth',fig.show='hold'>>=
 ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
   theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center",
                             position = "dodge") +
@@ -890,7 +890,7 @@ ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
   scale_fill_grey(start = 0.2, end = 0.9) +
   opts(legend.position = "top")
 @
-<<geom-dotplot-ex4-col,echo=!bw_version,eval=!bw_version,fig.width=3,fig.height=3,out.width=0.48\textwidth,fig.show=hold>>=
+<<geom-dotplot-ex4-col,echo=!bw_version,eval=!bw_version,fig.width=3,fig.height=3,out.width='0.48\\textwidth',fig.show='hold'>>=
 ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
   geom_dotplot(binaxis = "y", stackdir = "center",
                position = "dodge") +
@@ -902,7 +902,7 @@ ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
   facet_grid(. ~ vs, labeller = label_both) +
   opts(legend.position = "top")
 @
-@
+
 \subsection{\func{geom\_violin}}
 
 This function generates violin plots in \pkg{ggplot2}, a way to plot
@@ -918,8 +918,8 @@ proportional to the sample size. In the plot on the far right below,
 the bandwidth of the kernel density estimator is reduced from the
 default 1, which makes for a less smooth density estimate and hence a
 less smooth violin plot.
-<<geom-violin-ex1>>=
-<<geom-violin-ex1-bw,eval=bw_version,echo=bw_version,fig.width=3,fig.height=2.5,out.width=0.31\textwidth,fig.show=hold>>=
+
+<<geom-violin-ex1-bw,eval=bw_version,echo=bw_version,fig.width=3,fig.height=2.5,out.width='0.31\\textwidth',fig.show='hold'>>=
 p <- ggplot(mtcars, aes(factor(cyl), mpg))
 p + geom_violin()    # default scale is "count"
 p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl))) +
@@ -927,13 +927,13 @@ p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl))) +
     scale_colour_grey(start = 0.2, end = 0.8)
 p + geom_violin(adjust = 0.5)
 @
-<<geom-violin-ex1-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=2.5,out.width=0.31\textwidth,fig.show=hold>>=
+<<geom-violin-ex1-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=2.5,out.width='0.31\\textwidth',fig.show='hold'>>=
 p <- ggplot(mtcars, aes(factor(cyl), mpg))
 p + geom_violin()    # default scale is "count"
 p + geom_violin(aes(fill = factor(cyl), colour = factor(cyl)))
 p + geom_violin(adjust = 0.5)
 @
-@
+
 The next set of plots simply play around with a few extra features.
 The plot on the left adds a strip plot to the violin for each group.
 The central plot adds fill color and alpha transparency to the violins
@@ -942,7 +942,7 @@ a dot plot around the center of each violin, which is useful in that
 the dot plot resembles the shape of the violin (as it should since
 each estimates the underlying true density in its own way).
 <<geom_violin-ex22>>=
-<<geom-violin-ex22-bw,eval=bw_version,echo=bw_version,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
+<<geom-violin-ex22-bw,eval=bw_version,echo=bw_version,fig.width=3,fig.height=3,out.width='0.31\\textwidth',fig.show='hold'>>=
 set.seed(110)
 dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
 ggplot(dat, aes(x=x, y=y)) + geom_violin() + geom_point(shape=21) +
@@ -959,7 +959,7 @@ ggplot(dat, aes(x = x, y = y)) +
     geom_dotplot(binaxis = "y", stackdir = "center") +
     xlab("cyl")
 @
-<<geom-violin-ex22-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=3,out.width=0.31\textwidth,fig.show=hold>>=
+<<geom-violin-ex22-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=3,out.width='0.31\\textwidth',fig.show='hold'>>=
 set.seed(110)
 dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
 ggplot(dat, aes(x=x, y=y)) + geom_violin() + geom_point(shape=21) +
@@ -973,7 +973,6 @@ ggplot(dat, aes(x = x, y = y)) +
     geom_violin() +
     geom_dotplot(binaxis = "y", stackdir = "center") +
     xlab("cyl")
-@
 @
 
 \newpage
@@ -1079,7 +1078,7 @@ function's help page.
 
 The first plot illustrates a one-dimensional grid with free scales---the
 x scales vary and the panel widths are the same:
-<<facet-grid-example-1d,fig.width=5,fig.height=3>>=
+<<'facet-grid-example-1d',fig.width=5,fig.height=3>>=
 m <- ggplot(mtcars, aes(mpg, wt, colour = factor(cyl))) + geom_point()
 m + facet_grid(. ~ cyl, scales = "free") + labs(colour = "cyl")
 @
@@ -1089,7 +1088,7 @@ a basic 2D grid with free scales in both dimensions---in this case,
 each panel has separate $x$ and $y$ scales. The plot on the right
 shows that \code{margins = TRUE} is once again a viable option in
 \func{facet\_grid}.
-<<facet-grid-2d-example1,fig.width=4,fig.height=3.5,out.width=0.48\textwidth,fig.show=hold>>=
+<<'facet-grid-2d-example1',fig.width=4,fig.height=3.5,out.width='0.48\\textwidth',fig.show='hold'>>=
 m + facet_grid(vs ~ am, scales = "free") + labs(colour = "cyl") +
     opts(legend.position = "top")
 m + facet_grid(vs ~ am, margins = TRUE) + labs(colour = "cyl") +
@@ -1099,7 +1098,7 @@ One of the new features, due to the efforts of Willem Ligtenberg, is
 to allow free scales in one direction only. The left plot below produces
 different $x$ scales in the columns while the plot on the right
 produces different $y$ scales:
-<<facet-grid-2d-example2,fig.width=4,fig.height=4,out.width=0.48\textwidth,fig.show=hold>>=
+<<'facet-grid-2d-example2',fig.width=4,fig.height=4,out.width='0.48\\textwidth',fig.show='hold'>>=
 m + facet_grid(vs ~ am, scales = "free_x") + labs(colour = "cyl") +
     opts(legend.position = "top")
 # Add labeller to distinguish levels of vs
@@ -1126,7 +1125,7 @@ argument of \func{facet\_grid}. A couple of examples using the
 \func{label\_both} were shown above; the default labeller is
 \func{label\_value}. The following example from the \func{facet\_grid}
 help page in 0.9.0 demonstrates the other built-in labeling functions:
-<<facet-grid-label-ex,fig.width=4,fig.height=4,out.width=0.48\textwidth,fig.show=hold>>=
+<<facet-grid-label-ex,fig.width=4,fig.height=4,out.width='0.48\\textwidth',fig.show='hold'>>=
 mtcars$cyl2 <- factor(mtcars$cyl, labels = c("alpha", "beta", "sqrt(x, y)"))
 q <- qplot(mpg, wt, data = mtcars) + facet_grid(cyl ~ vs)
 # Recall that the levels of vs are 0 and 1:
@@ -1341,7 +1340,7 @@ described in \code{?strptime}. The following example comes from the
 axis. The plot on
 the left is the default plot whereas the one on the right modifies the
 date breaks and labels as well as expressing the response as a percentage:
-<<date-breaks-labels-ex1,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
+<<date-breaks-labels-ex1,fig.width=4,fig.height=2.8,out.width='0.45\\textwidth',fig.show='hold'>>=
 (qp <- qplot(date, psavert, data = economics, geom = "line") +
     labs(x = "Year", y = "Personal savings rate"))
 # Divide savings rate by 100 to get the correct percentages
@@ -1409,7 +1408,7 @@ histogram is the `statistical transformation' of interest.
 The left graph below is a histogram in the original scale of
 measurement while its counterpart on the right is computed from the
 natural logarithm of the original measurements.
-<<lognormal-ex1,fig.width=4,fig.height=2.5,out.width=.45\textwidth,fig.show=hold>>=
+<<lognormal-ex1,fig.width=4,fig.height=2.5,out.width='.45\\textwidth',fig.show='hold'>>=
 DF <- data.frame(x = rlnorm(1000, m = 10, sd = 5))
 # on original scale, produces a spiked histogram
 (p <- ggplot(DF, aes(x = x)) + geom_histogram())
@@ -1453,7 +1452,7 @@ linear breaks in the log scale by default, which is a sensible scaling
 
 Here's a similar example that was discussed on the ggplot2 list
 recently, using the diamonds data with the \func{scale\_x\_log10} function:
-<<diamonds-log10trans-labeling,fig.width=4,fig.height=2.8,out.width=.45\textwidth,fig.show=hold>>=
+<<diamonds-log10trans-labeling,fig.width=4,fig.height=2.8,out.width='.45\\textwidth',fig.show='hold'>>=
 dsmall <- diamonds[sample(nrow(diamonds), 1000), ]
 ## default x-axis log scaling
 qplot(carat, price, data = dsmall, alpha = I(0.2)) +
@@ -1480,7 +1479,7 @@ another. Here is an example using the \code{msleep} data from
 \pkg{MASS}, where both brain weight and body weight require a
 $\log_{10}$ transformation. Suppose you want the 0.8.9 behavior in both
 positional axis; here's one way to do it.
-<<loglogscale,fig.width=4,fig.height=2.5,out.width=.45\textwidth,fig.show=hold>>=
+<<loglogscale,fig.width=4,fig.height=2.5,out.width='.45\\textwidth',fig.show='hold'>>=
 # Define 'old style' behavior for log10 axes
 scale_x_log10old <- function(...) {
      scale_x_log10(breaks = trans_breaks('log10', function(x) 10^x),
@@ -1501,7 +1500,7 @@ ggplot(msleep, aes(x = bodywt, y = brainwt)) + geom_point() +
 Another example comes from the ggplot2 list, where someone wanted a
 `negative log 10' y-scale. Here are a couple of alternatives to choose
 from; there are certainly others.
-<<neglog10ex,fig.width=4,fig.height=2.5,out.width=.45\textwidth,fig.show=hold>>=
+<<neglog10ex,fig.width=4,fig.height=2.5,out.width='.45\\textwidth',fig.show='hold'>>=
 # Define the negative log 10 function
 neglog10 <- function(x) -log10(x)
 # Reverse scaling (zero on top)
@@ -1525,7 +1524,7 @@ ggplot(DF, aes(x, y)) + geom_point() + scale_y_neglog10()
 The final example in this subsection illustrates a couple more uses of
 the \func{math\_format} function to place mathematical expressions in
 axis labels.
-<<axis-labels-math1,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
+<<axis-labels-math1,fig.width=4,fig.height=2.8,out.width='0.45\\textwidth',fig.show='hold'>>=
 d <- data.frame(x = 1:10, y = 1:10)
 ## Math notation in labels
 ggplot(d, aes(x, y)) + geom_point() +
@@ -1566,7 +1565,7 @@ df1 <- data.frame(x = 1:10, y = round(runif(10), 3))
 qplot(x, y, data = df1)
 @
 \noindent Two ways of plotting the $\sin^{-1}$ transformation of y:
-<<arcsin-trans,fig.width=4,fig.height=2.8,out.width=.45\textwidth,fig.show=hold>>=
+<<arcsin-trans,fig.width=4,fig.height=2.8,out.width='.45\\textwidth',fig.show='hold'>>=
 qplot(x, y, data = df1) + scale_y_continuous(trans = "asn")
 qplot(x, y, data = df1) + coord_trans(ytrans = "asn")
 @
@@ -1586,7 +1585,7 @@ Here is an example from the \func{coord\_trans} help page to
 illustrate the difference between scale transformations prior to model
 fitting and coordinate transformations after a model fit. This is one
 type of graphic that could not be produced easily prior to version 0.9.0.
-<<scale-trans-distinction,dev=png,fig.width=4,fig.height=2.8,out.width=0.45\textwidth,fig.show=hold>>=
+<<scale-trans-distinction,dev='png',fig.width=4,fig.height=2.8,out.width='0.45\\textwidth',fig.show='hold'>>=
 d <- subset(diamonds, carat > 0.5)
 ## Scale transformation prior to model fitting
 qplot(carat, price, data = d, log="xy", alpha = I(0.05)) +
@@ -1608,7 +1607,7 @@ Ruppert, 1988) since the same coordinate transformation was applied to
 both sides of the fitted model.
 
 \noindent Separate transformations for $x$ and $y$ are also possible:
-<<indep-trans,dev=png,fig.width=3.5,fig.height=2.5>>=
+<<indep-trans,dev='png',fig.width=3.5,fig.height=2.5>>=
 qplot(carat, price, data = d, alpha = I(0.05)) +
    geom_smooth(method="lm", size = 1) +
    coord_trans(x = "log10", y = "sqrt") +
