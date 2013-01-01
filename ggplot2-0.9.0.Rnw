@@ -1661,7 +1661,7 @@ ed. New York: Springer.
 
 \noindent Xie, Y. (2012). \emph{knitr: A General-Purpose Tool for
   Dynamic Report Generation in R.}
-\url{http://yihui.github.com/knitr/demo/manual/}.
+\url{http://yihui.name/knitr/}.
 
 
 

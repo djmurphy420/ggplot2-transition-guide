@@ -1,6 +1,6 @@
 This document is meant to be processed with the knitr package. knitr is a re-implementation 
 of Sweave which does some nice things with a minimum of code.
-For information about the package, see http://yihui.github.com/knitr/ Look under the 
+For information about the package, see http://yihui.name/knitr/ Look under the
 Demos link for a growing body of documentation - the two main documents are the Manual 
 and Graphics demos. To learn how the package works, it's worth downloading both the pdf 
 and .Rnw files under each link.
