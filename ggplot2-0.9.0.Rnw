@@ -396,13 +396,13 @@ q <- ggplot(diamonds, aes(x = table, fill = clarity)) +
 <<gl1-bw,eval=bw_version,echo=bw_version,fig.width=4,fig.height=2.5>>=
 q + theme_bw() +
     guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
-       title.theme = theme_text(size = 12, face = "bold"))) +
+       title.theme = element_text(size = 12, face = "bold", angle = 0))) +
     scale_fill_grey(start = 0.1, end = 0.9) +
     xlim(45, 75)
 @
 <<gl1-col,eval=!bw_version,echo=!bw_version,fig.width=4,fig.height=2.5>>=
 q + guides(fill = guide_legend(nrow = 4, title.hjust = 0.4,
-       title.theme = theme_text(size = 12, face = "bold"))) +
+       title.theme = element_text(size = 12, face = "bold", angle = 0))) +
     xlim(45, 75)
 @
 @
@@ -416,14 +416,14 @@ specific to positional scale functions\footnote{See section~\ref{sec:axes}.}.
 <<gl2-bw,eval=FALSE,echo=bw_version>>=
 q + theme_bw() + scale_fill_discrete(
           guide = guide_legend(nrow = 4, title.hjust = 0.4,
-          title.theme = theme_text(size = 12, face = "bold"))) +
+          title.theme = element_text(size = 12, face = "bold"))) +
     scale_fill_grey(start = 0.1, end = 0.9) +
     xlim(45, 75)
 @
 <<gl2-col,eval=FALSE,echo=!bw_version>>=
 q + scale_fill_discrete(guide = guide_legend(nrow = 4,
        title.hjust = 0.4,
-       title.theme = theme_text(size = 12, face = "bold"))) +
+       title.theme = element_text(size = 12, face = "bold"))) +
     xlim(45, 75)
 @
 @
