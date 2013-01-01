@@ -28,8 +28,6 @@ install_github('knitr', 'yihui')
 Continuing,
 
 ```r
-library('ggplot2')
-library('scales')
 library('knitr')
 knit('filename.Rnw')
 ```
