@@ -14,39 +14,24 @@ the header are, in general, different. The basic structure is
 @
 ```
 
-To process this document in R, you need the development versions of ggplot2, scales and 
-knitr, which in turn means that you need to have Rtools loaded. To install the correct 
-versions of the packages,
-
-```r
-library('devtools')
-install_github('ggplot2', 'hadley')
-install_github('scales', 'hadley')
-install_github('knitr', 'yihui')
-```
+A color pdf version of this document is included in the repo along with the .Rnw source file.
+If you want to run the source code yourself in R, you need the latest version of knitr and a 
+version of ggplot2 greater than 0.9.0 (at the time this is (re)written, the current version 
+is 0.9.3).
 
 Continuing,
 
 ```r
 library('knitr')
-knit('filename.Rnw')
+knit2pdf('ggplot2-0.9.0.Rnw')
 ```
 
-will process the .Rnw file and output a filename.tex file that can be run with pdflatex, either
-from the command line or inside an IDE such as Eclipse or Emacs. Very similar to Sweave(). 
+will process the .Rnw file and output both a ggplot2-0.9.0.tex file that can be run with pdflatex
+and a corresponding pdf file. The default version is in color.
 
-To get a color copy of the transition guide, create a subdirectory under the one where the .Rnw 
-resides; let's call it col. For B/W, create another directory named bw.
-
-Start up R and setwd() to the directory containing the .Rnw file. Then for color:
-
-```r
-setwd('./col')
-bw_version <- FALSE
-knit2pdf('../ggplot2-0.9.0.Rnw')
-```
-
-For a B/W friendly version: from the directory with the .Rnw file,
+To get a B/W copy, for example to print on a B/W printer, create a subdirectory named bw.
+Start up R and setwd() to the directory containing the .Rnw file. From the directory 
+containing the .Rnw file,
 
 ```r
 setwd('./bw')
@@ -54,9 +39,10 @@ bw_version <- TRUE
 knit2pdf('../ggplot2-0.9.0.Rnw')
 ```
 
-That's it. Thanks to Yihui Xie for the script, and of course, for the knitr package.
+That's it. Thanks to Yihui Xie for fixing up the document to make it compatible with the
+current version of the superb knitr package.
 
 If you have any questions, e-mail me at djmuseR at gmail dot com.
 
-Thanks for contributing!
+Thanks!
 Dennis
