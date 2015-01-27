@@ -72,17 +72,18 @@
 \begin{document}
 <<setup,include=FALSE,cache=FALSE>>=
 options(width = 90, replace.assign = TRUE)
-require('ggplot2')
-require('plyr')
-require('reshape2')
-require('scales')
-require('rgdal')
-require('maps')
-require('maptools')
-require('rgeos')
-require('MASS')
-require('gridExtra')
-require('ReadImages')
+library('ggplot2')
+library('plyr')
+library('reshape2')
+library('scales')
+library('rgdal')
+library('maps')
+library('maptools')
+library('rgeos')
+library('MASS')
+library('gridExtra')
+library('jpeg')
+library('knitr')
 opts_chunk$set(fig.align='center',cache=TRUE,message=FALSE,tidy=FALSE,comment=NA)
 
 # you can change bw_version=TRUE to get a B/W version
@@ -582,7 +583,7 @@ ggplot(crimes, aes(map_id = state)) +
     geom_map(aes(fill = Murder), map = states_map) +
     expand_limits(x = states_map$long, y = states_map$lat) +
     guides(fill = guide_colorbar(colours = topo.colors(10))) +
-    opts(legend.position = "top")
+    theme(legend.position = "top")
 @
 \noindent In this choropleth map, the initial \func{ggplot} call
 invokes the data
@@ -635,7 +636,7 @@ ggplot(elect.gen.tot, aes(map_id = id)) +
     expand_limits(x = world.ggmap$long, y = world.ggmap$lat) +
     scale_fill_gradient(low = "orange", high = "blue",
                         guide = "colorbar") +
-    opts(panel.background = theme_rect(fill = "skyblue"))
+    theme(panel.background = theme_rect(fill = "skyblue"))
 @
 \noindent There are some holes in the map due to missing data
 from a couple of countries in south central Africa and the Republic of
@@ -882,25 +883,25 @@ ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
                             position = "dodge") +
   labs(x = "vs", y = "mpg", fill = "cyl") +
   scale_fill_grey(start = 0.2, end = 0.9) +
-  opts(legend.position = "top")
+  theme(legend.position = "top")
 ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
   theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center") +
   labs(x = "No. cylinders", y = "mpg", fill = "cyl") +
   facet_grid(. ~ vs, labeller = label_both) +
   scale_fill_grey(start = 0.2, end = 0.9) +
-  opts(legend.position = "top")
+  theme(legend.position = "top")
 @
 <<geom-dotplot-ex4-col,echo=!bw_version,eval=!bw_version,fig.width=3,fig.height=3,out.width='0.48\\textwidth',fig.show='hold'>>=
 ggplot(mtcars, aes(x = factor(vs), fill = factor(cyl), y = mpg)) +
   geom_dotplot(binaxis = "y", stackdir = "center",
                position = "dodge") +
   labs(x = "vs", y = "mpg", fill = "cyl") +
-  opts(legend.position = "top")
+  theme(legend.position = "top")
 ggplot(mtcars, aes(x = factor(cyl), fill = factor(cyl), y = mpg)) +
   geom_dotplot(binaxis = "y", stackdir = "center") +
   labs(x = "No. cylinders", y = "mpg", fill = "cyl") +
   facet_grid(. ~ vs, labeller = label_both) +
-  opts(legend.position = "top")
+  theme(legend.position = "top")
 @
 
 \subsection{\func{geom\_violin}}
@@ -941,7 +942,7 @@ and is augmented with boxplots. The plot on the far right adds
 a dot plot around the center of each violin, which is useful in that
 the dot plot resembles the shape of the violin (as it should since
 each estimates the underlying true density in its own way).
-<<geom_violin-ex22>>=
+
 <<geom-violin-ex22-bw,eval=bw_version,echo=bw_version,fig.width=3,fig.height=3,out.width='0.31\\textwidth',fig.show='hold'>>=
 set.seed(110)
 dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
@@ -959,6 +960,7 @@ ggplot(dat, aes(x = x, y = y)) +
     geom_dotplot(binaxis = "y", stackdir = "center") +
     xlab("cyl")
 @
+
 <<geom-violin-ex22-col,eval=!bw_version,echo=!bw_version,fig.width=3,fig.height=3,out.width='0.31\\textwidth',fig.show='hold'>>=
 set.seed(110)
 dat <- data.frame(x=LETTERS[1:3], y=round(rnorm(90), 2))
@@ -1024,7 +1026,7 @@ tb <- tableGrob(ISsumm, rows = ISsumm$spray, show.rownames = FALSE,
                 gpar.corefill = gpar(fill = "white"))
 if (!file.exists("hadley.jpg"))
   download.file("http://had.co.nz/me.jpg", "hadley.jpg", mode = "wb")
-hadley <- read.jpeg("hadley.jpg")
+hadley <- readJPEG("hadley.jpg")
 ggplot(ISsumm, aes(x = spray, y = mean)) +
     geom_boxplot(data = InsectSprays, aes(y = count),
                  fill = "blue", alpha = 0.2,
@@ -1037,8 +1039,8 @@ ggplot(ISsumm, aes(x = spray, y = mean)) +
     annotation_raster(hadley, xmin = 5.5, xmax = 6.5,
                               ymin = 30, ymax = 40)
 @
-\noindent Note that the \func{read.jpeg} function comes from the
-\pkg{ReadImages} package, designed to read JPEG and PNG files.
+\noindent Note that the \func{readJPEG} function comes from the
+\pkg{jpeg} package, designed to read JPEG files.
 
 If you resize a \code{ggplot} graphic in a document with decorations
 such as those shown in the previous two examples, there is no guarantee that
@@ -1058,7 +1060,7 @@ mapping. Here's a simple example:
 <<facets-with-raster,fig.width=3.5,fig.height=3.5>>=
 DF <- data.frame(x = 1:10, y1 = rnorm(10), y2 = rnorm(10))
 # Read in the R logo:
-Rlogo <- read.jpeg(file.path(R.home("doc"), "html", "logo.jpg"))
+Rlogo <- readJPEG(file.path(R.home("doc"), "html", "logo.jpg"))
 # Melt and plot:
 dfm <- melt(DF, id = "x")
 ggplot(dfm, aes(x = x, y = value)) + geom_path() +
@@ -1090,9 +1092,9 @@ shows that \code{margins = TRUE} is once again a viable option in
 \func{facet\_grid}.
 <<'facet-grid-2d-example1',fig.width=4,fig.height=3.5,out.width='0.48\\textwidth',fig.show='hold'>>=
 m + facet_grid(vs ~ am, scales = "free") + labs(colour = "cyl") +
-    opts(legend.position = "top")
+    theme(legend.position = "top")
 m + facet_grid(vs ~ am, margins = TRUE) + labs(colour = "cyl") +
-    opts(legend.position = "top")
+    theme(legend.position = "top")
 @
 One of the new features, due to the efforts of Willem Ligtenberg, is
 to allow free scales in one direction only. The left plot below produces
@@ -1100,12 +1102,12 @@ different $x$ scales in the columns while the plot on the right
 produces different $y$ scales:
 <<'facet-grid-2d-example2',fig.width=4,fig.height=4,out.width='0.48\\textwidth',fig.show='hold'>>=
 m + facet_grid(vs ~ am, scales = "free_x") + labs(colour = "cyl") +
-    opts(legend.position = "top")
+    theme(legend.position = "top")
 # Add labeller to distinguish levels of vs
 # from those of am:
 m + facet_grid(vs ~ am, scales = "free_y", labeller = label_both) +
     labs(colour = "cyl") +
-    opts(legend.position = "top")
+    theme(legend.position = "top")
 @
 
 %\newpage
@@ -1669,12 +1671,6 @@ ed. New York: Springer.
 \noindent Xie, Y. (2012). \emph{knitr: A General-Purpose Tool for
   Dynamic Report Generation in R.}
 \url{http://yihui.name/knitr/}.
-
-
-
-
-
-
 
 
 \end{document}
